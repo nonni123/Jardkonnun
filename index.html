@@ -201,6 +201,8 @@
   <input id="gh-path" placeholder="Jardkonnun2026_central.csv" autocomplete="off">
   <label for="gh-branch">Grein (branch)</label>
   <input id="gh-branch" placeholder="main" autocomplete="off">
+  <label for="gh-photodir">Mappa fyrir myndir í repo</label>
+  <input id="gh-photodir" placeholder="myndir" autocomplete="off">
   <label for="gh-token">Aðgangslykill (fine-grained PAT)</label>
   <input id="gh-token" type="password" placeholder="github_pat_..." autocomplete="off">
   <div class="hint">Lykillinn er aðeins geymdur í þessu tæki. Búðu til fine-grained token á GitHub með heimildinni Contents: Read and write á þetta eina repo.</div>
@@ -212,6 +214,9 @@
   <div class="row">
     <button class="btn btn-ghost" id="gh-sync">Samstilla núna</button>
     <button class="btn btn-primary" id="gh-save">Vista</button>
+  </div>
+  <div class="row">
+    <button class="btn btn-ghost" id="gh-photos-sync">☁ Samstilla myndir</button>
   </div>
 </dialog>
 
@@ -482,7 +487,7 @@ function openForm(fid){
     if(f.type==='photos'){
       html+='<label>'+esc(f.name)+'</label>'
         +'<div class="photos" id="photo-block"></div>'
-        +'<div class="hint">Myndir fá heiti punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn.</div>';
+        +'<div class="hint">Myndir fá heiti punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn. Þær hlaðast sjálfkrafa upp á GitHub með næstu samstillingu.</div>';
       return;
     }
     html+='<label for="'+id+'">'+esc(f.name)+'</label>';
@@ -719,7 +724,7 @@ function processPhotoFile(file,p,seq){
             final=new Blob([buf],{type:'image/jpeg'});
           }
           res({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
-                fid:p.fid, name:name, lat:lat, lon:lon, createdAt:Date.now(), blob:final });
+                fid:p.fid, name:name, lat:lat, lon:lon, createdAt:Date.now(), uploaded:false, blob:final });
         }).catch(rej);
       },'image/jpeg',0.85);
     };
@@ -743,7 +748,7 @@ function renderPhotoBlock(p){
     block.innerHTML=list.map(function(ph){
       return '<div class="ph"><img src="'+URL.createObjectURL(ph.blob)+'" alt="'+esc(ph.name)+'">'
         +'<button class="del" data-pid="'+esc(ph.id)+'" aria-label="Eyða mynd">✕</button>'
-        +'<div class="nm">'+esc(ph.name)+(ph.lat===null?' · án GPS':'')+'</div></div>';
+        +'<div class="nm">'+esc(ph.name)+(ph.lat===null?' · án GPS':'')+(ph.uploaded?' · ☁︎':' · ekki uploadað')+'</div></div>';
     }).join('')
     +'<div class="add-photo" id="add-photo">📷<small>Taka mynd</small></div>';
     document.getElementById('add-photo').onclick=function(){ $('#photo-input').click(); };
@@ -852,6 +857,86 @@ function b64ToText(b64){
   for(var i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i);
   return new TextDecoder('utf-8').decode(u8);
 }
+
+/* ---------- GitHub: myndir ---------- */
+function ghPhotoUrl(cfg,name){
+  var dir=(cfg.photoDir||'myndir').replace(/^\/|\/$/g,'');
+  return 'https://api.github.com/repos/'+cfg.repo+'/contents/'
+    +dir.split('/').map(encodeURIComponent).join('/')+'/'+encodeURIComponent(name);
+}
+function uploadOnePhoto(cfg,headers,ph){
+  var url=ghPhotoUrl(cfg,ph.name), branch=cfg.branch||'main';
+  return ph.blob.arrayBuffer().then(function(buf){
+    var body={ message:'Ljósmynd: '+ph.name, content:u8ToB64(new Uint8Array(buf)), branch:branch };
+    return fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)}).then(function(r){
+      if(r.status===409||r.status===422){
+        // Skráin er þegar til á GitHub (t.d. endurupphlaðin mynd) - sækjum sha og reynum aftur
+        return fetch(url+'?ref='+encodeURIComponent(branch),{headers:headers})
+          .then(function(r2){ if(!r2.ok) throw new Error('HTTP '+r2.status); return r2.json(); })
+          .then(function(info){
+            body.sha=info.sha;
+            return fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+          });
+      }
+      return r;
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return true;
+    });
+  });
+}
+var photoSyncing=false;
+function uploadPendingPhotos(silent){
+  var cfg=ghCfg();
+  if(!ghConfigured()||photoSyncing||!db) return Promise.resolve();
+  photoSyncing=true;
+  var headers={ 'Authorization':'Bearer '+cfg.token, 'Accept':'application/vnd.github+json' };
+  return allPhotos().then(function(list){
+    var pending=list.filter(function(ph){ return !ph.uploaded; });
+    if(!pending.length){
+      photoSyncing=false;
+      if(!silent) setGhStatus('Allar myndir eru þegar á GitHub.');
+      return;
+    }
+    var done=0, failed=0;
+    if(!silent) setGhStatus('Samstilli myndir (0/'+pending.length+')...');
+    var chain=Promise.resolve();
+    pending.forEach(function(ph){
+      chain=chain.then(function(){
+        return uploadOnePhoto(cfg,headers,ph).then(function(){
+          ph.uploaded=true;
+          return idbPutPhoto(ph);
+        }).catch(function(err){
+          console.warn('Mynd '+ph.name+' - upphleðsla mistókst:',err);
+          failed++;
+        }).then(function(){
+          done++;
+          if(!silent) setGhStatus('Samstilli myndir ('+done+'/'+pending.length+')...');
+        });
+      });
+    });
+    return chain.then(function(){
+      photoSyncing=false;
+      var okCount=done-failed;
+      if(!silent){
+        setGhStatus('Myndir samstilltar: '+okCount+'/'+pending.length+(failed?(' ('+failed+' mistókust)'):''));
+      }
+      if(okCount>0){
+        toast(okCount+(okCount===1?' mynd vistuð á GitHub ✓':' myndir vistaðar á GitHub ✓'));
+      }
+      renderPhotoBlockIfOpen();
+    });
+  }).catch(function(err){
+    photoSyncing=false;
+    console.warn('Myndasamstilling:',err);
+    if(!silent) setGhStatus('Myndasamstilling mistókst: '+err.message);
+  });
+}
+function renderPhotoBlockIfOpen(){
+  if(!currentFid) return;
+  var p=points.filter(function(x){return x.fid===currentFid;})[0];
+  if(p) renderPhotoBlock(p);
+}
 /* Fléttar staðbundnar skráningar inn í miðlæga CSV-textann.
    Byrjar á miðlægu skránni (heldur skráningum annarra) og skrifar
    aðeins yfir þá dálka sem ÞETTA tæki hefur fyllt út, eftir fid. */
@@ -950,6 +1035,7 @@ function syncToGitHub(push,isRetry){
           setGhStatus('Vistað á GitHub ✓ '+new Date().toLocaleTimeString('is-IS'));
           toast('Miðlæg CSV uppfærð á GitHub ✓');
           syncing=false;
+          uploadPendingPhotos(true); // myndir fylgja með í bakgrunni, óháð CSV-samstillingu
         });
     })
     .catch(function(err){
@@ -964,6 +1050,7 @@ document.getElementById('btn-settings').addEventListener('click',function(){
   $('#gh-repo').value=cfg.repo||'';
   $('#gh-path').value=cfg.path||'Jardkonnun2026_central.csv';
   $('#gh-branch').value=cfg.branch||'main';
+  $('#gh-photodir').value=cfg.photoDir||'myndir';
   $('#gh-token').value=cfg.token||'';
   var last=null;
   try{ last=parseInt(localStorage.getItem(LS_LASTSYNC),10); }catch(e){}
@@ -976,6 +1063,7 @@ function saveGhCfg(){
     repo:$('#gh-repo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,''),
     path:$('#gh-path').value.trim()||'Jardkonnun2026_central.csv',
     branch:$('#gh-branch').value.trim()||'main',
+    photoDir:$('#gh-photodir').value.trim().replace(/^\/|\/$/g,'')||'myndir',
     token:$('#gh-token').value.trim()
   };
   try{ localStorage.setItem(LS_GH,JSON.stringify(cfg)); }catch(e){}
@@ -1000,6 +1088,10 @@ document.getElementById('btn-sync').addEventListener('click',function(){
     return;
   }
   runSync(true);
+});
+document.getElementById('gh-photos-sync').addEventListener('click',function(){
+  saveGhCfg();
+  uploadPendingPhotos(false);
 });
 
 /* ---------- Kort ---------- */
