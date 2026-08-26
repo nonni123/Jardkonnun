@@ -1,14 +1,14 @@
 ﻿fid;Nr.;Nafn;Gerð;NG;X;Y;Z;H;Lengd;Horn;Unnið af;Dagsetning;tími;Ljósmynd;ALmenn lýsing á Jarðvegsaðstæðum;Til sérstakrar athugunar;Stagfestugerð;Gæði mats (1:borað, 2:pjakkað, 3:metið á staðnum) (V-H-A-F);Dýpi á jarðvatn [m] (V-H-A-F);Þykkt á lífrænu lagi [m] (V-H-A-F);Dýpi á burðarhæft [m] (V-H-A-F);Dýpi á fast [m] (V-H-A-F);Lífrænt efni (V-H-A-F);Yfir burðarhæfu (V-H-A-F);Burðarhæft efni (V-H-A-F);Klöpp (V-H-A-F);Er Nægjanlegt pláss fyrir mastrið, undirstöður, stagfestur og annan búnað?;Eru aðstæður fullnægjandi (fen, skurður, lækjarfarvegur o.s.frv.)?;Er mastrið utan hættusvæðis vegna landsbrots, skriðufalla, snjóflóða o.s.frv.?;Er mastrið utan við tún eða aðra viðkvæma staði?;Er staðbundin snjósöfnun í mastursstæði ólíkleg?;Er hóflegur hliðarhalli í mastursstæði?;Er þörf á sérstökum ráðstöfunum í mastursstæði? Ef þörf, þá hver?;Eru aðstæður í mastursstæði betri ef mastri er hliðrað til?;Leiðir færsla á mastri til þess að færa þurfi næstu möstur?;Er góð aðkoma að mastursstæði;Er þörf á aðkomuslóð (ef ekki, þá hvers vegna?);Er þörf á slóð fyrir jarðvinnutæki?;Er þörf á reisingarplani fyrir krana?;Búið að teikna aðkomuslóð a mynd?;Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei);Mastursstæði er í lagi, ekki þörf á breytingu;Skráning lokið (x)
 1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 2;0;-;Tengiv.;0 Tv. BLA;461972.131;546421.181;;;;;;2026-08-12;;Nr.-0_1.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
-3;1;-;FAJ;1 FAJ;461942.483;546472.358;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-4;2;-;FAJ;2 FAJ;461784.561;546567.332;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-5;3;-;BSJ;3 BSJ;461717.865;546844.159;;;;;Ástmar ;;;;ég er vinna í þessu;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+3;1;-;FAJ;1 FAJ;461942.483;546472.358;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
+4;2;-;FAJ;2 FAJ;461784.561;546567.332;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
+5;3;-;BSJ;3 BSJ;461717.865;546844.159;;;;;Ástmar ;;;;ég er vinna í þessu;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 6;4;-;SMHJ;4 SMHJ;461680.429;546999.54;;;;;Ástmar ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 7;5;5-B;BSJ;5 BSJ;461495.183;547269.472;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-8;6;6-B;BSJE;6 BSJE;461281.827;547580.363;;;;;;;;6-B_1.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+8;6;6-B;BSJE;6 BSJE;461281.827;547580.363;;;;;;;;6-B_1.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 9;7;7-B;BS;7 BS;461068.006;547923.919;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-10;8;7A-B;BS;8 BS;460889.969;548209.981;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+10;8;7A-B;BS;8 BS;460889.969;548209.981;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 11;9;7B-B;BS;9 BS;460706.198;548505.255;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 12;10;8-B;BS;10 BS;460519.147;548805.799;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 13;11;9-B;BS;11 BS;460343.592;549087.871;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
