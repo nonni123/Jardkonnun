@@ -204,6 +204,9 @@
   <div class="hint" id="gh-status" style="margin-top:8px"></div>
   <div class="row">
     <button class="btn btn-ghost" id="gh-close">Loka</button>
+    <button class="btn btn-ghost" id="gh-fetch">Sækja miðlægu skrána</button>
+  </div>
+  <div class="row">
     <button class="btn btn-ghost" id="gh-sync">Samstilla núna</button>
     <button class="btn btn-primary" id="gh-save">Vista</button>
   </div>
@@ -942,6 +945,10 @@ document.getElementById('gh-save').addEventListener('click',function(){
 document.getElementById('gh-sync').addEventListener('click',function(){
   saveGhCfg();
   syncToGitHub(true,false);
+});
+document.getElementById('gh-fetch').addEventListener('click',function(){
+  saveGhCfg();
+  syncToGitHub(false,false);
 });
 
 /* ---------- Kort ---------- */
