@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14161A">
+<title>EFLA Jarðkönnun 2026 — Blöndulína 3</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+<style>
+  :root{
+    --bg:#14161A;
+    --surface:#1E2127;
+    --surface-2:#262A31;
+    --line:#333844;
+    --text:#F2F3F5;
+    --muted:#9BA1AB;
+    --red:#FA0000;
+    --red-dim:#7d0505;
+    --green:#3ecf8e;
+    --amber:#f4b740;
+    --mono:'SF Mono','JetBrains Mono','Roboto Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:16px;line-height:1.4;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overscroll-behavior:none;
+  }
+  .app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+  header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:1200}
+  .logo{width:36px;height:36px;background:var(--red);border-radius:6px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+  .logo svg{width:24px;height:24px;display:block}
+  header h1{font-size:15px;letter-spacing:.12em;text-transform:uppercase;margin:0;font-weight:700}
+  header .sub{font-size:11px;color:var(--muted);letter-spacing:.06em}
+
+  main{flex:1;padding:16px;padding-bottom:96px}
+  .view{display:none}
+  .view.active{display:block}
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700}
+
+  .seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:14px}
+  .seg button{flex:1;background:none;border:none;color:var(--muted);padding:9px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .seg button.active{background:var(--surface-2);color:var(--text)}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .toolbar{display:flex;gap:8px;margin-bottom:12px}
+  .toolbar input{flex:1}
+  .sortsel{flex:0 0 auto;width:auto}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px}
+  .card:active{background:var(--surface-2)}
+  .card .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+  .card .meta{flex:1;min-width:0}
+  .card .nafn{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .info{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+  .card .dist{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
+  .empty{text-align:center;color:var(--muted);padding:48px 16px}
+
+  .dot-gray{background:#5b6069}
+  .dot-amber{background:var(--amber)}
+  .dot-green{background:var(--green)}
+
+  label{display:block;font-size:12px;letter-spacing:.02em;color:var(--muted);margin:14px 0 6px}
+  input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px 13px;font-size:16px;font-family:var(--sans)}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--red)}
+  textarea{resize:vertical;min-height:64px}
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:14px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans);width:100%}
+  .btn-primary{background:var(--red);color:#fff}
+  .btn-primary:active{background:var(--red-dim)}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
+  .btn-ghost:active{background:var(--surface)}
+  .btn-stack{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px;z-index:1200}
+
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-family:var(--mono);text-align:right}
+  .badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:20px;background:var(--surface-2);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .badge.done{color:var(--green)}
+  .badge.wip{color:var(--amber)}
+
+  .section{margin-top:22px}
+  .done-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:22px}
+  .done-row input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;accent-color:var(--green)}
+  .done-row span{font-weight:600}
+
+  #map{height:62vh;min-height:340px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+  .leaflet-popup-content{font-family:var(--sans);font-size:13px;line-height:1.5}
+  .leaflet-popup-content button,.leaflet-popup-content a.gm{display:inline-block;background:var(--red);color:#fff !important;border:none;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;margin-top:4px;margin-right:6px}
+  .leaflet-container{font-family:var(--sans)}
+  .pt-label{background:rgba(20,22,26,.85);border:1px solid var(--line);border-radius:4px;color:var(--text);font-size:11px;font-weight:700;padding:0 4px;box-shadow:none}
+
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .photos .ph{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+  .photos .ph img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .photos .ph .nm{font-size:10px;color:var(--muted);padding:3px 5px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .photos .ph .del{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:6px;background:rgba(0,0,0,.65);border:none;color:#fff;font-size:14px;cursor:pointer}
+  .add-photo{display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:1;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:26px;cursor:pointer;background:var(--surface)}
+  .add-photo small{font-size:10px;letter-spacing:.06em}
+
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:10px;font-size:14px;z-index:1500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+  .toast.show{opacity:1}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo" role="img" aria-label="EFLA">
+      <svg viewBox="425 350 1290 1290" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" aria-hidden="true">
+        <path d="M1000.27,1125.77 C1030.83,1168.64 1045.98,1215.85 1045.39,1267.68 C1044.07,1381.82 963.40,1478.40 851.17,1499.29 C717.94,1524.09 597.73,1435.03 573.74,1311.73 C548.87,1183.89 628.92,1059.32 756.36,1033.00 C851.62,1013.33 931.69,1043.12 994.39,1118.04 C996.31,1120.34 998.04,1122.80 1000.27,1125.77 z"/>
+        <path d="M1485.76,1223.77 C1437.95,1270.74 1360.84,1255.92 1333.25,1197.43 C1305.38,1138.35 1344.84,1069.66 1409.58,1063.44 C1459.23,1058.68 1501.67,1092.73 1510.83,1136.73 C1517.70,1169.74 1509.33,1198.64 1485.76,1223.77 z"/>
+        <path d="M1449.32,564.47 C1482.22,577.12 1503.17,599.76 1510.83,633.47 C1522.98,686.95 1487.06,737.26 1435.94,746.77 C1384.47,756.35 1334.07,721.47 1325.71,669.78 C1317.21,617.21 1351.71,568.90 1404.17,560.59 C1419.08,558.23 1434.07,559.29 1449.32,564.47 z"/>
+        <path d="M1614.12,375.81 C1654.70,358.86 1699.61,386.48 1701.91,430.68 C1703.52,461.46 1682.33,489.42 1652.00,495.27 C1616.99,502.03 1590.93,482.50 1580.55,457.27 C1568.99,429.18 1579.67,396.54 1605.49,380.31 C1608.01,378.72 1610.76,377.48 1614.12,375.81 z"/>
+        <path d="M926.17,625.84 C964.06,612.91 1001.62,638.25 1008.59,673.04 C1013.07,695.40 1003.56,725.68 977.83,740.16 C954.50,753.29 925.27,750.43 905.21,732.72 C871.45,702.93 878.62,648.80 918.99,628.81 C921.07,627.78 923.26,626.97 926.17,625.84 z"/>
+        <path d="M453.34,1600.52 C432.34,1567.27 445.37,1521.50 484.14,1507.44 C508.04,1498.77 530.44,1502.83 549.09,1520.34 C567.98,1538.09 573.85,1560.40 566.07,1585.12 C558.42,1609.42 541.33,1624.21 515.96,1628.19 C489.70,1632.32 469.18,1622.34 453.34,1600.52 z"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Jarðkönnun 2026</h1>
+      <div class="sub" id="hdr-sub">Blöndulína 3</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- LISTI / KORT -->
+    <section class="view active" id="view-list">
+      <div class="seg">
+        <button id="seg-list" class="active">Listi</button>
+        <button id="seg-map">Kort</button>
+      </div>
+      <div class="panel active" id="panel-list">
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Leita (nr., nafn, gerð)..." autocomplete="off">
+          <select id="sort" class="sortsel">
+            <option value="line">Línuröð</option>
+            <option value="dist">Fjarlægð</option>
+          </select>
+        </div>
+        <div id="list-container"><div class="empty">Engin gögn hlaðin.<br>Notaðu „Flytja inn CSV“ hnappinn.</div></div>
+      </div>
+      <div class="panel" id="panel-map">
+        <div id="map"></div>
+        <div class="hint" style="margin-top:10px">Grár = óskráð · gulur = í vinnslu · grænn = lokið. Númer birtast þegar zoomað er inn.</div>
+        <button class="btn btn-ghost" id="btn-layers" style="margin-top:10px">⬆ Bæta við lagi (shapefile-zip / GeoJSON)</button>
+        <div class="hint" style="margin-top:6px">Zip þarf að innihalda .shp og .dbf (helst líka .prj). Lagið vistast í tækinu og hægt er að kveikja/slökkva á því í lagavalinu á kortinu.</div>
+      </div>
+    </section>
+
+    <!-- SKRÁNING -->
+    <section class="view" id="view-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <h2 style="margin:0" id="f-title">—</h2>
+        <span class="badge" id="f-badge">—</span>
+      </div>
+      <div id="f-meta"></div>
+      <div class="section">
+        <h2>Skráning í mörkinni</h2>
+        <div id="f-fields"></div>
+      </div>
+      <div class="done-row">
+        <input type="checkbox" id="f-done">
+        <span>Skráningu lokið fyrir þennan punkt</span>
+      </div>
+      <div class="hint" style="margin-top:8px">Allt vistast sjálfkrafa í tækinu um leið og skrifað er.</div>
+    </section>
+  </main>
+
+  <div class="btn-stack" id="footer-actions"></div>
+</div>
+
+<input type="file" id="csv-input" accept=".csv,text/csv" style="display:none">
+<input type="file" id="photo-input" accept="image/*" capture="environment" multiple style="display:none">
+<input type="file" id="layer-input" accept=".zip,.geojson,.json,application/zip,application/json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2.9.2/dist/proj4.js"></script>
+<script src="https://unpkg.com/shpjs@4.0.4/dist/shp.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   EFLA Jarðkönnun 2026 — Blöndulína 3
+   Les mastrapunkta úr CSV (ISN93). Útfylling í mörkinni vistast
+   staðbundið (localStorage) og flyst út sem sama CSV-snið.
+   ============================================================ */
+
+var ISN93 = '+proj=lcc +lat_1=64.25 +lat_2=65.75 +lat_0=65 +lon_0=-19 +x_0=500000 +y_0=500000 +ellps=GRS80 +units=m +no_defs +type=crs';
+var CSV_FILE = 'jardkonnun.csv';
+var LS_CSV = 'jk2026_csv';
+var LS_EDITS = 'jk2026_edits';
+var LABEL_MIN_ZOOM = 13;
+
+/* Fyrstu dálkarnir (0..HORN_IDX) eru forútfylltir og aðeins til sýnis */
+var HORN_IDX = 10;
+var COL = { fid:0, nr:1, nafn:2, gerd:3, ng:4, x:5, y:6, z:7, h:8, lengd:9, horn:10 };
+
+var $ = function(s){ return document.querySelector(s); };
+function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+function toast(m){ var t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove('show');},2500); }
+
+/* ---------- CSV þáttun (styður "..." gæsalappir og línubil í gildum) ---------- */
+function parseCsvText(text){
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // BOM
+  var rows=[], row=[], cell='', inQ=false, i, ch;
+  for(i=0;i<text.length;i++){
+    ch=text[i];
+    if(inQ){
+      if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else inQ=false; }
+      else cell+=ch;
+    } else if(ch==='"'){ inQ=true; }
+    else if(ch===';'){ row.push(cell); cell=''; }
+    else if(ch==='\n'||ch==='\r'){
+      if(ch==='\r'&&text[i+1]==='\n') i++;
+      row.push(cell); cell=''; rows.push(row); row=[];
+    } else cell+=ch;
+  }
+  if(cell!==''||row.length){ row.push(cell); rows.push(row); }
+  return rows;
+}
+function csvCell(v){
+  v = String(v==null?'':v);
+  if(/[;"\r\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"';
+  return v;
+}
+
+/* ---------- Ástand ---------- */
+var header=[], rawRows=[], points=[], fields=[];
+var edits = {};   // { fid: { v:{colIdx:value}, done:bool } }
+var userPos = null;
+
+function loadEdits(){ try{ edits = JSON.parse(localStorage.getItem(LS_EDITS)) || {}; }catch(e){ edits = {}; } }
+function saveEdits(){ try{ localStorage.setItem(LS_EDITS, JSON.stringify(edits)); }catch(e){ toast('Vistun mistókst — geymsla full?'); } }
+
+/* ---------- Sviðsgerðir út frá heiti dálks ---------- */
+function fieldType(name){
+  var n = name.toLowerCase();
+  if(n === 'dagsetning') return 'date';
+  if(n === 'tími' || n === 'timi') return 'time';
+  if(n.indexOf('1: já, 2:nei') !== -1) return 'select12';
+  if(n.indexOf('lýsing') !== -1 || n.indexOf('athugunar') !== -1) return 'textarea';
+  if(n.indexOf('hver') !== -1) return 'text'; // "ef þörf, þá hver" / "hvers vegna"
+  if(/^(er |eru |leiðir |búið )/.test(n)) return 'select';
+  return 'text';
+}
+var ljosIdx = -1; // dálkurinn "Ljósmynd" - fær sjálfvirkt myndanöfn
+function buildFields(){
+  fields = [];
+  ljosIdx = -1;
+  for(var i=HORN_IDX+1;i<header.length;i++){
+    var name=(header[i]||'').trim();
+    if(name==='') continue;
+    if(name.toLowerCase().indexOf('ljósmynd')!==-1){
+      ljosIdx = i;
+      fields.push({ index:i, name:name, type:'photos' });
+      continue;
+    }
+    fields.push({ index:i, name:name, type:fieldType(name) });
+  }
+}
+
+/* ---------- Gögn ---------- */
+function buildPoints(){
+  points = [];
+  rawRows.forEach(function(row, ri){
+    var x = parseFloat(row[COL.x]), y = parseFloat(row[COL.y]);
+    if(!isFinite(x)||!isFinite(y)) return;
+    var ll = proj4(ISN93,'EPSG:4326',[x,y]);
+    points.push({
+      fid: (row[COL.fid]||'').trim(), rowIndex: ri,
+      nr: (row[COL.nr]||'').trim(), nafn: (row[COL.nafn]||'').trim(),
+      gerd: (row[COL.gerd]||'').trim(), ng: (row[COL.ng]||'').trim(),
+      x:x, y:y, z:(row[COL.z]||'').trim(),
+      lengd: parseFloat(row[COL.lengd]),
+      lon: ll[0], lat: ll[1], marker: null
+    });
+  });
+}
+function displayName(p){
+  if(p.nafn && p.nafn!=='-') return p.nafn;
+  if(p.nr) return 'Nr. '+p.nr;
+  return p.ng || ('fid '+p.fid);
+}
+function pointStatus(p){
+  var e = edits[p.fid];
+  if(!e) return 'gray';
+  if(e.done) return 'green';
+  var any=false, k;
+  for(k in e.v){ if(e.v[k]!==''){ any=true; break; } }
+  return any ? 'amber' : 'gray';
+}
+function statusColor(st){ return st==='green' ? '#3ecf8e' : st==='amber' ? '#f4b740' : '#5b6069'; }
+
+function updateProgress(){
+  var done=0;
+  points.forEach(function(p){ if(pointStatus(p)==='green') done++; });
+  $('#hdr-sub').textContent = points.length ? ('Blöndulína 3 · '+done+' af '+points.length+' lokið') : 'Blöndulína 3';
+}
+
+/* ---------- Hleðsla CSV ---------- */
+function applyCsv(text){
+  var rows = parseCsvText(text);
+  if(!rows.length){ toast('Tóm CSV-skrá'); return false; }
+  header = rows[0];
+  rawRows = rows.slice(1);
+  if(header.length < HORN_IDX+2 || (header[COL.x]||'').trim().toUpperCase()!=='X'){
+    toast('Óvænt CSV-snið — X-dálkur fannst ekki á réttum stað'); return false;
+  }
+  buildFields();
+  buildPoints();
+  try{ localStorage.setItem(LS_CSV, text); }catch(e){}
+  renderList(); updateProgress();
+  if(mapInited) renderMapMarkers();
+  return true;
+}
+function initialLoad(){
+  var stored = null;
+  try{ stored = localStorage.getItem(LS_CSV); }catch(e){}
+  if(stored){ applyCsv(stored); toast('Gögn sótt úr minni tækisins'); return; }
+  fetch(CSV_FILE).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(t){
+    if(applyCsv(t)) toast('CSV hlaðin: '+points.length+' punktar');
+  }).catch(function(err){
+    console.warn('Náði ekki í '+CSV_FILE+':', err.message);
+    $('#list-container').innerHTML = '<div class="empty">Engin gögn fundust.<br>Ýttu á „Flytja inn CSV“ og veldu Jardkonnun2026input.csv</div>';
+  });
+}
+
+/* ---------- Listi ---------- */
+function haversine(lat1,lon1,lat2,lon2){
+  var R=6371000, toR=Math.PI/180;
+  var dLat=(lat2-lat1)*toR, dLon=(lon2-lon1)*toR;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*toR)*Math.cos(lat2*toR)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function fmtDist(m){ return m<1000 ? Math.round(m)+' m' : (m/1000).toFixed(1).replace('.',',')+' km'; }
+
+function renderList(){
+  var c=$('#list-container');
+  if(!points.length){ c.innerHTML='<div class="empty">Engin gögn hlaðin.</div>'; return; }
+  var q=($('#search').value||'').trim().toLowerCase();
+  var sortBy=$('#sort').value;
+  var list=points.filter(function(p){
+    if(!q) return true;
+    return (p.nr+' '+p.nafn+' '+p.ng+' '+p.gerd).toLowerCase().indexOf(q)!==-1;
+  });
+  if(sortBy==='dist' && userPos){
+    list.sort(function(a,b){
+      return haversine(userPos.lat,userPos.lon,a.lat,a.lon)-haversine(userPos.lat,userPos.lon,b.lat,b.lon);
+    });
+  } else {
+    list.sort(function(a,b){ return (a.lengd||0)-(b.lengd||0); });
+  }
+  if(!list.length){ c.innerHTML='<div class="empty">Ekkert fannst.</div>'; return; }
+  c.innerHTML=list.map(function(p){
+    var st=pointStatus(p);
+    var d=userPos?fmtDist(haversine(userPos.lat,userPos.lon,p.lat,p.lon)):'';
+    var km=isFinite(p.lengd)?p.lengd.toFixed(2).replace('.',',')+' km':'';
+    return '<div class="card" data-fid="'+esc(p.fid)+'">'
+      +'<div class="dot dot-'+st+'"></div>'
+      +'<div class="meta"><div class="nafn">'+esc(displayName(p))+'</div>'
+      +'<div class="info">'+esc(p.gerd)+(p.ng?' · '+esc(p.ng):'')+(km?' · '+km:'')+'</div></div>'
+      +(d?'<div class="dist">'+d+'</div>':'')
+      +'</div>';
+  }).join('');
+  c.querySelectorAll('.card').forEach(function(el){
+    el.onclick=function(){ openForm(el.dataset.fid); };
+  });
+}
+$('#search').addEventListener('input', renderList);
+$('#sort').addEventListener('change', function(){
+  if($('#sort').value==='dist' && !userPos) toast('GPS-staðsetning ekki þekkt ennþá');
+  renderList();
+});
+
+/* ---------- Skráningarform ---------- */
+var currentFid=null;
+function getVal(p, colIdx){
+  var e=edits[p.fid];
+  if(e && e.v && (colIdx in e.v)) return e.v[colIdx];
+  return (rawRows[p.rowIndex][colIdx]||'').trim();
+}
+function setVal(fid, colIdx, value){
+  if(!edits[fid]) edits[fid]={v:{},done:false};
+  edits[fid].v[colIdx]=value;
+  saveEdits(); updateProgress();
+}
+function openForm(fid){
+  var p=points.filter(function(x){return x.fid===fid;})[0];
+  if(!p) return;
+  currentFid=fid;
+  $('#f-title').textContent=displayName(p);
+  var st=pointStatus(p);
+  var badge=$('#f-badge');
+  badge.textContent = st==='green'?'Lokið':st==='amber'?'Í vinnslu':'Óskráð';
+  badge.className='badge'+(st==='green'?' done':st==='amber'?' wip':'');
+  $('#f-meta').innerHTML=
+    '<div class="kv"><span class="k">Nr.</span><span class="v">'+esc(p.nr||'—')+'</span></div>'
+    +'<div class="kv"><span class="k">Gerð</span><span class="v">'+esc(p.gerd||'—')+'</span></div>'
+    +'<div class="kv"><span class="k">NG</span><span class="v">'+esc(p.ng||'—')+'</span></div>'
+    +'<div class="kv"><span class="k">X / Y (ISN93)</span><span class="v">'+p.x.toFixed(1)+' / '+p.y.toFixed(1)+'</span></div>'
+    +'<div class="kv"><span class="k">Z / Lengd</span><span class="v">'+esc(p.z||'—')+' m / '+(isFinite(p.lengd)?p.lengd.toFixed(2):'—')+' km</span></div>';
+
+  var html='';
+  fields.forEach(function(f){
+    var val=getVal(p,f.index);
+    var id='fld-'+f.index;
+    if(f.type==='photos'){
+      html+='<label>'+esc(f.name)+'</label>'
+        +'<div class="photos" id="photo-block"></div>'
+        +'<div class="hint">Myndir fá heiti punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn.</div>';
+      return;
+    }
+    html+='<label for="'+id+'">'+esc(f.name)+'</label>';
+    if(f.type==='textarea'){
+      html+='<textarea id="'+id+'" data-col="'+f.index+'">'+esc(val)+'</textarea>';
+    } else if(f.type==='select'){
+      html+='<select id="'+id+'" data-col="'+f.index+'">'
+        +'<option value=""'+(val===''?' selected':'')+'>—</option>'
+        +'<option value="Já"'+(val==='Já'?' selected':'')+'>Já</option>'
+        +'<option value="Nei"'+(val==='Nei'?' selected':'')+'>Nei</option>'
+        +'</select>';
+    } else if(f.type==='select12'){
+      html+='<select id="'+id+'" data-col="'+f.index+'">'
+        +'<option value=""'+(val===''?' selected':'')+'>—</option>'
+        +'<option value="1"'+(val==='1'?' selected':'')+'>1 — já</option>'
+        +'<option value="2"'+(val==='2'?' selected':'')+'>2 — nei</option>'
+        +'</select>';
+    } else {
+      var t=f.type==='date'?'date':f.type==='time'?'time':'text';
+      html+='<input id="'+id+'" type="'+t+'" data-col="'+f.index+'" value="'+esc(val)+'" autocomplete="off">';
+      if(f.name.indexOf('V-H-A-F')!==-1) html+='<div class="hint">Fjögur gildi, eitt á hvern fót: V-H-A-F</div>';
+    }
+  });
+  $('#f-fields').innerHTML=html;
+  $('#f-fields').querySelectorAll('input,textarea,select').forEach(function(el){
+    var ev = el.tagName==='SELECT'?'change':'input';
+    el.addEventListener(ev, function(){
+      setVal(currentFid, parseInt(el.dataset.col,10), el.value);
+      refreshBadge();
+    });
+  });
+  $('#f-done').checked = !!(edits[fid] && edits[fid].done);
+  renderPhotoBlock(p);
+  show('form');
+  window.scrollTo(0,0);
+}
+function refreshBadge(){
+  var p=points.filter(function(x){return x.fid===currentFid;})[0];
+  if(!p) return;
+  var st=pointStatus(p);
+  var badge=$('#f-badge');
+  badge.textContent = st==='green'?'Lokið':st==='amber'?'Í vinnslu':'Óskráð';
+  badge.className='badge'+(st==='green'?' done':st==='amber'?' wip':'');
+}
+$('#f-done').addEventListener('change', function(){
+  if(!currentFid) return;
+  if(!edits[currentFid]) edits[currentFid]={v:{},done:false};
+  edits[currentFid].done=$('#f-done').checked;
+  saveEdits(); updateProgress(); refreshBadge();
+});
+
+/* ---------- Sýnastjórn ---------- */
+function show(view){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  $('#view-'+view).classList.add('active');
+  renderFooter(view);
+}
+function renderFooter(view){
+  var f=$('#footer-actions');
+  if(view==='list'){
+    f.innerHTML='<button class="btn btn-ghost" id="fa-import">⬆ CSV inn</button><button class="btn btn-ghost" id="fa-photos">⬇ Myndir</button><button class="btn btn-primary" id="fa-export">⬇ CSV út</button>';
+    $('#fa-import').onclick=function(){ $('#csv-input').click(); };
+    $('#fa-photos').onclick=exportPhotos;
+    $('#fa-export').onclick=exportCsv;
+  } else if(view==='form'){
+    f.innerHTML='<button class="btn btn-ghost" id="fa-back">← Listi</button>';
+    $('#fa-back').onclick=function(){ renderList(); updateProgress(); if(mapInited)renderMapMarkers(); show('list'); };
+  }
+}
+
+/* ---------- Innflutningur / útflutningur ---------- */
+$('#csv-input').addEventListener('change', function(e){
+  var file=e.target.files[0];
+  if(!file) return;
+  file.text().then(function(t){
+    if(applyCsv(t)) toast('CSV flutt inn: '+points.length+' punktar');
+  }).catch(function(){ toast('Lestur skrár mistókst'); });
+  e.target.value='';
+});
+function exportCsv(){
+  if(!header.length){ toast('Engin gögn til að flytja út'); return; }
+  var lines=[header.map(csvCell).join(';')];
+  rawRows.forEach(function(row){
+    var fid=(row[COL.fid]||'').trim();
+    var out=row.slice();
+    var e=edits[fid];
+    if(fid && e && e.v){
+      Object.keys(e.v).forEach(function(k){ out[parseInt(k,10)]=e.v[k]; });
+    }
+    lines.push(out.map(csvCell).join(';'));
+  });
+  var d=new Date();
+  var name='Jardkonnun2026_utfyllt_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.csv';
+  var blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=name; a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  toast('CSV flutt út: '+name);
+}
+
+/* ---------- Ljósmyndir: IndexedDB-geymsla ---------- */
+var db=null;
+function openDB(){
+  return new Promise(function(res){
+    if(!('indexedDB' in window)){ res(); return; }
+    var r=indexedDB.open('jk2026',1);
+    r.onupgradeneeded=function(e){
+      var d=e.target.result;
+      if(!d.objectStoreNames.contains('photos')){
+        var s=d.createObjectStore('photos',{keyPath:'id'});
+        s.createIndex('fid','fid',{unique:false});
+      }
+    };
+    r.onsuccess=function(e){ db=e.target.result; res(); };
+    r.onerror=function(){ console.warn('IndexedDB opnaðist ekki'); res(); };
+  });
+}
+function idbPutPhoto(p){ return new Promise(function(res,rej){ var r=db.transaction('photos','readwrite').objectStore('photos').put(p); r.onsuccess=function(){res(p);}; r.onerror=function(){rej(r.error);}; }); }
+function idbDelPhoto(id){ return new Promise(function(res,rej){ var r=db.transaction('photos','readwrite').objectStore('photos').delete(id); r.onsuccess=function(){res();}; r.onerror=function(){rej(r.error);}; }); }
+function photosByFid(fid){ return new Promise(function(res,rej){ var r=db.transaction('photos','readonly').objectStore('photos').index('fid').getAll(IDBKeyRange.only(fid)); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){rej(r.error);}; }); }
+function allPhotos(){ return new Promise(function(res,rej){ var r=db.transaction('photos','readonly').objectStore('photos').getAll(); r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){rej(r.error);}; }); }
+
+/* ---------- EXIF: GPS-hnit skrifuð inn í JPEG ---------- */
+function dmsRationals(deg){
+  var d=Math.floor(deg), mf=(deg-d)*60, m=Math.floor(mf), s=(mf-m)*60;
+  return [[d,1],[m,1],[Math.round(s*1000),1000]];
+}
+function buildExifSegment(lat,lon,alt,when,desc){
+  var descStr=(desc||' ')+'\u0000';
+  if(descStr.length%2) descStr+='\u0000';
+  var d=new Date(when);
+  function p2(x){ return String(x).length<2?'0'+x:String(x); }
+  var dateStr=d.getFullYear()+':'+p2(d.getMonth()+1)+':'+p2(d.getDate())+' '
+    +p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds())+'\u0000'; // 20 bæti
+  var hasAlt = alt!==null && isFinite(alt);
+  var gpsEntries = hasAlt?7:5;
+  var ifd0Count=3, ifd0Start=8;
+  var ifd0Size=2+ifd0Count*12+4;
+  var descOff=ifd0Start+ifd0Size;
+  var dateOff=descOff+descStr.length;
+  var gpsOff=dateOff+20;
+  var gpsSize=2+gpsEntries*12+4;
+  var latOff=gpsOff+gpsSize, lonOff=latOff+24, altOff=lonOff+24;
+  var total=hasAlt?altOff+8:altOff;
+  var buf=new ArrayBuffer(total), v=new DataView(buf);
+  function w8(o,x){v.setUint8(o,x);}
+  function w16(o,x){v.setUint16(o,x,true);}
+  function w32(o,x){v.setUint32(o,x,true);}
+  function wStr(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i)&0xFF);}
+  wStr(0,'II'); w16(2,42); w32(4,8);
+  var o=ifd0Start; w16(o,ifd0Count); o+=2;
+  // 0x010E ImageDescription (ASCII)
+  w16(o,0x010E); w16(o+2,2); w32(o+4,descStr.length); w32(o+8,descOff); o+=12;
+  // 0x0132 DateTime (ASCII, 20 bæti)
+  w16(o,0x0132); w16(o+2,2); w32(o+4,20); w32(o+8,dateOff); o+=12;
+  // 0x8825 GPS IFD bendir
+  w16(o,0x8825); w16(o+2,4); w32(o+4,1); w32(o+8,gpsOff); o+=12;
+  w32(o,0);
+  wStr(descOff,descStr); wStr(dateOff,dateStr);
+  o=gpsOff; w16(o,gpsEntries); o+=2;
+  // GPSVersionID 2.3.0.0
+  w16(o,0x0000); w16(o+2,1); w32(o+4,4); w8(o+8,2); w8(o+9,3); w8(o+10,0); w8(o+11,0); o+=12;
+  // LatRef
+  w16(o,0x0001); w16(o+2,2); w32(o+4,2); w8(o+8,(lat>=0?'N':'S').charCodeAt(0)); w8(o+9,0); o+=12;
+  // Lat (3 RATIONAL)
+  w16(o,0x0002); w16(o+2,5); w32(o+4,3); w32(o+8,latOff); o+=12;
+  // LonRef
+  w16(o,0x0003); w16(o+2,2); w32(o+4,2); w8(o+8,(lon>=0?'E':'W').charCodeAt(0)); w8(o+9,0); o+=12;
+  // Lon (3 RATIONAL)
+  w16(o,0x0004); w16(o+2,5); w32(o+4,3); w32(o+8,lonOff); o+=12;
+  if(hasAlt){
+    w16(o,0x0005); w16(o+2,1); w32(o+4,1); w8(o+8,alt>=0?0:1); o+=12; // AltRef
+    w16(o,0x0006); w16(o+2,5); w32(o+4,1); w32(o+8,altOff); o+=12;   // Alt
+  }
+  w32(o,0);
+  function writeR(off,rs){ rs.forEach(function(r,i){ w32(off+i*8,r[0]); w32(off+i*8+4,r[1]); }); }
+  writeR(latOff,dmsRationals(Math.abs(lat)));
+  writeR(lonOff,dmsRationals(Math.abs(lon)));
+  if(hasAlt) writeR(altOff,[[Math.round(Math.abs(alt)*100),100]]);
+  var tiff=new Uint8Array(buf);
+  var len=2+6+tiff.length;
+  var app1=new Uint8Array(2+len);
+  app1[0]=0xFF; app1[1]=0xE1;
+  app1[2]=(len>>8)&0xFF; app1[3]=len&0xFF;
+  app1[4]=0x45; app1[5]=0x78; app1[6]=0x69; app1[7]=0x66; app1[8]=0; app1[9]=0; // "Exif\0\0"
+  app1.set(tiff,10);
+  return app1;
+}
+function insertExif(jpegBuf,app1){
+  var src=new Uint8Array(jpegBuf);
+  if(src[0]!==0xFF||src[1]!==0xD8) return new Blob([src],{type:'image/jpeg'});
+  var out=new Uint8Array(src.length+app1.length);
+  out[0]=0xFF; out[1]=0xD8;
+  out.set(app1,2);
+  out.set(src.subarray(2),2+app1.length);
+  return new Blob([out],{type:'image/jpeg'});
+}
+
+/* ---------- Myndataka og vinnsla ---------- */
+function sanitizeName(s){ return s.replace(/[\\\/:*?"<>|;,\s]+/g,'-'); }
+function nextSeq(existing){
+  var max=0;
+  existing.forEach(function(ph){
+    var m=ph.name.match(/_(\d+)\.jpg$/i);
+    if(m) max=Math.max(max,parseInt(m[1],10));
+  });
+  return max+1;
+}
+function processPhotoFile(file,p,seq){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file);
+    var img=new Image();
+    img.onload=function(){
+      var MAX=1600;
+      var w=img.naturalWidth,h=img.naturalHeight;
+      var sc=Math.min(1,MAX/Math.max(w,h));
+      var c=document.createElement('canvas');
+      c.width=Math.round(w*sc); c.height=Math.round(h*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(blob){
+        if(!blob){ rej(new Error('JPEG-kóðun mistókst')); return; }
+        blob.arrayBuffer().then(function(buf){
+          var name=sanitizeName(displayName(p))+'_'+seq+'.jpg';
+          var final, lat=null, lon=null;
+          if(userPos){
+            lat=userPos.lat; lon=userPos.lon;
+            final=insertExif(buf, buildExifSegment(lat,lon,userPos.alt,Date.now(),name.replace(/\.jpg$/,'')));
+          } else {
+            final=new Blob([buf],{type:'image/jpeg'});
+          }
+          res({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+                fid:p.fid, name:name, lat:lat, lon:lon, createdAt:Date.now(), blob:final });
+        }).catch(rej);
+      },'image/jpeg',0.85);
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('Myndalestur mistókst')); };
+    img.src=url;
+  });
+}
+function refreshLjosmyndValue(p){
+  if(ljosIdx===-1) return Promise.resolve();
+  return photosByFid(p.fid).then(function(list){
+    list.sort(function(a,b){ return a.createdAt-b.createdAt; });
+    setVal(p.fid, ljosIdx, list.map(function(ph){return ph.name;}).join(', '));
+  });
+}
+function renderPhotoBlock(p){
+  var block=document.getElementById('photo-block');
+  if(!block) return;
+  if(!db){ block.innerHTML='<div class="hint">Myndageymsla ekki tiltæk í þessum vafra.</div>'; return; }
+  photosByFid(p.fid).then(function(list){
+    list.sort(function(a,b){ return a.createdAt-b.createdAt; });
+    block.innerHTML=list.map(function(ph){
+      return '<div class="ph"><img src="'+URL.createObjectURL(ph.blob)+'" alt="'+esc(ph.name)+'">'
+        +'<button class="del" data-pid="'+esc(ph.id)+'" aria-label="Eyða mynd">✕</button>'
+        +'<div class="nm">'+esc(ph.name)+(ph.lat===null?' · án GPS':'')+'</div></div>';
+    }).join('')
+    +'<div class="add-photo" id="add-photo">📷<small>Taka mynd</small></div>';
+    document.getElementById('add-photo').onclick=function(){ $('#photo-input').click(); };
+    block.querySelectorAll('.del').forEach(function(b){
+      b.onclick=function(){
+        idbDelPhoto(b.dataset.pid).then(function(){ return refreshLjosmyndValue(p); })
+          .then(function(){ renderPhotoBlock(p); refreshBadge(); toast('Mynd eytt'); });
+      };
+    });
+  });
+}
+$('#photo-input').addEventListener('change', function(e){
+  var files=Array.prototype.slice.call(e.target.files);
+  e.target.value='';
+  if(!files.length||!currentFid) return;
+  if(!db){ toast('Myndageymsla ekki tiltæk'); return; }
+  var p=points.filter(function(x){return x.fid===currentFid;})[0];
+  if(!p) return;
+  photosByFid(p.fid).then(function(existing){
+    var seq=nextSeq(existing);
+    var chain=Promise.resolve();
+    files.forEach(function(f,i){
+      chain=chain.then(function(){ return processPhotoFile(f,p,seq+i).then(idbPutPhoto); });
+    });
+    return chain;
+  }).then(function(){ return refreshLjosmyndValue(p); })
+    .then(function(){
+      renderPhotoBlock(p); refreshBadge();
+      toast(userPos?'Mynd vistuð með GPS-hnitum ✓':'Mynd vistuð — ATH: án GPS-hnita (staðsetning óþekkt)');
+    })
+    .catch(function(err){ console.error('Myndvistun:',err); toast('Vistun myndar mistókst'); });
+});
+
+/* ---------- Zip-útflutningur mynda (store, engin þjöppun) ---------- */
+var CRC_T=(function(){ var t=[],c,n,k; for(n=0;n<256;n++){ c=n; for(k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
+function crc32(u8){ var c=0xFFFFFFFF; for(var i=0;i<u8.length;i++) c=CRC_T[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function dosDateTime(ts){
+  var d=new Date(ts);
+  return { time:(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),
+           date:((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate() };
+}
+function buildZip(entries){
+  var parts=[], central=[], offset=0;
+  var enc=new TextEncoder();
+  entries.forEach(function(en){
+    var nm=enc.encode(en.name), crc=crc32(en.data), dt=dosDateTime(en.ts||Date.now());
+    var lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
+    lh.setUint16(10,dt.time,true); lh.setUint16(12,dt.date,true);
+    lh.setUint32(14,crc,true); lh.setUint32(18,en.data.length,true); lh.setUint32(22,en.data.length,true);
+    lh.setUint16(26,nm.length,true); lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer),nm,en.data);
+    var ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true); ch.setUint16(10,0,true);
+    ch.setUint16(12,dt.time,true); ch.setUint16(14,dt.date,true);
+    ch.setUint32(16,crc,true); ch.setUint32(20,en.data.length,true); ch.setUint32(24,en.data.length,true);
+    ch.setUint16(28,nm.length,true);
+    ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer),nm);
+    offset+=30+nm.length+en.data.length;
+  });
+  var cdSize=0; central.forEach(function(u){ cdSize+=u.length; });
+  var eo=new DataView(new ArrayBuffer(22));
+  eo.setUint32(0,0x06054b50,true);
+  eo.setUint16(8,entries.length,true); eo.setUint16(10,entries.length,true);
+  eo.setUint32(12,cdSize,true); eo.setUint32(16,offset,true);
+  return new Blob(parts.concat(central,[new Uint8Array(eo.buffer)]),{type:'application/zip'});
+}
+function exportPhotos(){
+  if(!db){ toast('Myndageymsla ekki tiltæk'); return; }
+  allPhotos().then(function(list){
+    if(!list.length){ toast('Engar myndir vistaðar'); return; }
+    var entries=[], chain=Promise.resolve();
+    list.forEach(function(ph){
+      chain=chain.then(function(){
+        return ph.blob.arrayBuffer().then(function(b){
+          entries.push({name:ph.name,data:new Uint8Array(b),ts:ph.createdAt});
+        });
+      });
+    });
+    chain.then(function(){
+      var url=URL.createObjectURL(buildZip(entries));
+      var a=document.createElement('a'); a.href=url; a.download='Jardkonnun2026_myndir.zip'; a.click();
+      setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+      toast('Myndir fluttar út: '+entries.length);
+    });
+  });
+}
+
+/* ---------- Kort ---------- */
+$('#seg-list').onclick=function(){ showPanel('list'); };
+$('#seg-map').onclick=function(){ showPanel('map'); };
+function showPanel(which){
+  $('#seg-list').classList.toggle('active',which==='list');
+  $('#seg-map').classList.toggle('active',which==='map');
+  $('#panel-list').classList.toggle('active',which==='list');
+  $('#panel-map').classList.toggle('active',which==='map');
+  if(which==='map'){
+    setTimeout(function(){ initMap(); if(map){ map.invalidateSize(); renderMapMarkers(); } },60);
+  } else {
+    renderList();
+  }
+}
+var map=null, markerLayer=null, layersControl=null, mapInited=false, userMarker=null, accCircle=null, mapFitted=false;
+function initMap(){
+  if(mapInited) return;
+  if(typeof L==='undefined'){ $('#map').innerHTML='<div style="padding:24px;color:var(--muted);text-align:center">Leaflet hlóðst ekki — athugaðu nettengingu.</div>'; return; }
+  map=L.map('map',{zoomControl:true}).setView([65.3,-19.5],7);
+  var osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+  var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Loftmynd © Esri, Maxar, Earthstar Geographics'});
+  osm.addTo(map);
+  layersControl=L.control.layers({'Kort (OSM)':osm,'Loftmynd (Esri)':esri},null,{position:'topright'}).addTo(map);
+  markerLayer=L.layerGroup().addTo(map);
+  map.on('zoomend', updateMapLabels);
+  mapInited=true;
+  loadLineLayers();
+}
+
+/* ---------- GIS-lög (shapefile-zip / GeoJSON) ---------- */
+var LS_LINES='jk2026_lines';
+function reprojectIsn93IfNeeded(geojson){
+  var needs=false;
+  function walk(coords,fn){
+    if(typeof coords[0]==='number') return fn(coords);
+    return coords.map(function(c){ return walk(c,fn); });
+  }
+  var feats=geojson.features||[];
+  for(var i=0;i<feats.length;i++){
+    var g=feats[i].geometry;
+    if(!g||!g.coordinates) continue;
+    walk(g.coordinates,function(pt){
+      if(Math.abs(pt[0])>180||Math.abs(pt[1])>90) needs=true;
+      return pt;
+    });
+    break;
+  }
+  if(!needs) return geojson;
+  console.warn('GIS-lag: hnit líta út fyrir að vera í ISN93 - umbreyti í WGS84.');
+  feats.forEach(function(f){
+    var g=f.geometry;
+    if(!g||!g.coordinates) return;
+    g.coordinates=walk(g.coordinates,function(pt){ return proj4(ISN93,'EPSG:4326',[pt[0],pt[1]]); });
+  });
+  return geojson;
+}
+function addLineLayer(geojson,name){
+  var layer=L.geoJSON(geojson,{
+    style:{color:'#d32f2f',weight:3,opacity:.9},
+    pointToLayer:function(f,latlng){
+      return L.circleMarker(latlng,{radius:5,color:'#fff',weight:1,fillColor:'#d32f2f',fillOpacity:.9});
+    },
+    onEachFeature:function(feature,fl){
+      var props=feature.properties||{};
+      var keys=Object.keys(props).filter(function(k){ return props[k]!==null&&props[k]!==''; });
+      if(!keys.length) return;
+      fl.bindPopup(keys.map(function(k){ return '<b>'+esc(k)+':</b> '+esc(props[k]); }).join('<br>'));
+    }
+  });
+  layer.addTo(map);
+  layersControl.addOverlay(layer,esc(name));
+}
+function savedLines(){
+  try{ return JSON.parse(localStorage.getItem(LS_LINES))||[]; }catch(e){ return []; }
+}
+function applyLineData(collections,persist){
+  var saved=persist?savedLines():null;
+  collections.forEach(function(col,i){
+    var name=col.fileName||col.name||('Lag '+(i+1));
+    var gj=reprojectIsn93IfNeeded(col.geojson||col);
+    addLineLayer(gj,name);
+    if(persist) saved.push({name:name,geojson:gj});
+  });
+  if(persist){
+    try{ localStorage.setItem(LS_LINES,JSON.stringify(saved)); }
+    catch(e){ toast('Lagið birtist en rúmaðist ekki í geymslu tækisins - flyttu það inn aftur næst.'); }
+  }
+}
+function loadLineLayers(){
+  var saved=savedLines();
+  if(saved.length){
+    saved.forEach(function(s){ addLineLayer(s.geojson,s.name); });
+    return;
+  }
+  fetch('linuleid.zip').then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.arrayBuffer();
+  }).then(function(buf){ return shp(buf); })
+  .then(function(result){
+    applyLineData(Array.isArray(result)?result:[result],false);
+  }).catch(function(){
+    fetch('linuleid.geojson').then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(gj){ applyLineData([{name:'Línuleið',geojson:gj}],false); })
+    .catch(function(){ /* ekkert lag - sleppt */ });
+  });
+}
+document.getElementById('btn-layers').addEventListener('click',function(){
+  $('#layer-input').click();
+});
+$('#layer-input').addEventListener('change',function(e){
+  var file=e.target.files[0];
+  e.target.value='';
+  if(!file) return;
+  initMap();
+  var isZip=/\.zip$/i.test(file.name);
+  var p;
+  if(isZip){
+    p=file.arrayBuffer().then(function(buf){ return shp(buf); }).then(function(result){
+      return Array.isArray(result)?result:[result];
+    });
+  } else {
+    p=file.text().then(function(t){
+      return [{name:file.name.replace(/\.(geo)?json$/i,''),geojson:JSON.parse(t)}];
+    });
+  }
+  p.then(function(collections){
+    applyLineData(collections,true);
+    toast('Lag flutt inn: '+collections.length);
+  }).catch(function(err){
+    console.error('Lag-innflutningur:',err);
+    toast('Lestur skrár mistókst - er þetta zippuð shapefile eða GeoJSON?');
+  });
+});
+function renderMapMarkers(){
+  if(!mapInited) return;
+  markerLayer.clearLayers();
+  var latlngs=[];
+  points.forEach(function(p){
+    var st=pointStatus(p);
+    var m=L.circleMarker([p.lat,p.lon],{radius:7,color:'#fff',weight:1.5,fillColor:statusColor(st),fillOpacity:.95});
+    var gm='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat.toFixed(6)+','+p.lon.toFixed(6))+'&travelmode=driving';
+    m.bindPopup('<b>'+esc(displayName(p))+'</b><br>'+esc(p.gerd)+(p.ng?' · '+esc(p.ng):'')
+      +'<br>'+(st==='green'?'Lokið':st==='amber'?'Í vinnslu':'Óskráð')
+      +'<br><button onclick="openForm(\''+esc(p.fid)+'\')">Skrá →</button>'
+      +'<a class="gm" href="'+gm+'" target="_blank" rel="noopener noreferrer">Leið</a>');
+    m.bindTooltip(esc(p.nr||p.nafn||p.fid),{permanent:true,direction:'top',offset:[0,-7],className:'pt-label'});
+    m.addTo(markerLayer);
+    p.marker=m;
+    latlngs.push([p.lat,p.lon]);
+  });
+  if(latlngs.length && !mapFitted){ map.fitBounds(latlngs,{padding:[40,40],maxZoom:15}); mapFitted=true; }
+  updateMapLabels();
+}
+function updateMapLabels(){
+  if(!mapInited) return;
+  var showL=map.getZoom()>=LABEL_MIN_ZOOM;
+  points.forEach(function(p){
+    if(!p.marker||!p.marker.getTooltip()) return;
+    if(showL) p.marker.openTooltip(); else p.marker.closeTooltip();
+  });
+}
+
+/* ---------- GPS ---------- */
+if('geolocation' in navigator){
+  navigator.geolocation.watchPosition(function(pos){
+    userPos={lat:pos.coords.latitude,lon:pos.coords.longitude,alt:pos.coords.altitude};
+    if(mapInited){
+      if(!userMarker){
+        userMarker=L.circleMarker([userPos.lat,userPos.lon],{radius:9,color:'#fff',weight:3,fillColor:'#1a73e8',fillOpacity:1}).addTo(map);
+        accCircle=L.circle([userPos.lat,userPos.lon],{radius:pos.coords.accuracy,color:'#1a73e8',weight:1,fillColor:'#1a73e8',fillOpacity:.15,interactive:false}).addTo(map);
+      } else {
+        userMarker.setLatLng([userPos.lat,userPos.lon]);
+        accCircle.setLatLng([userPos.lat,userPos.lon]);
+        accCircle.setRadius(pos.coords.accuracy);
+      }
+    }
+  },function(err){
+    console.warn('GPS:',err.message);
+  },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+}
+
+/* ---------- Ræsing ---------- */
+loadEdits();
+renderFooter('list');
+openDB().then(initialLoad);
+</script>
+</body>
+</html>
