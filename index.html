@@ -107,6 +107,8 @@
   header .spacer{flex:1}
   .icon-btn{background:none;border:1px solid var(--line);color:var(--text);width:40px;height:40px;border-radius:8px;font-size:18px;cursor:pointer;flex:0 0 auto}
   .icon-btn:active{background:var(--surface-2)}
+  .icon-btn.spinning{animation:jk-spin 1s linear infinite}
+  @keyframes jk-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
   dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:20px;max-width:420px;width:90%}
   dialog::backdrop{background:rgba(0,0,0,.6)}
@@ -136,6 +138,7 @@
       <div class="sub" id="hdr-sub">Blöndulína 3</div>
     </div>
     <div class="spacer"></div>
+    <button class="icon-btn" id="btn-sync" title="Samstilla við GitHub" aria-label="Samstilla">🔄</button>
     <button class="icon-btn" id="btn-settings" title="GitHub-samstilling" aria-label="Stillingar">⚙</button>
   </header>
 
@@ -266,11 +269,37 @@ function csvCell(v){
 
 /* ---------- Ástand ---------- */
 var header=[], rawRows=[], points=[], fields=[];
-var edits = {};   // { fid: { v:{colIdx:value}, done:bool } }
+var edits = {};   // { fid: { v:{colIdx:value} } } - "lokið" er sjálfur dálkurinn doneIdx
 var userPos = null;
+var DONE_COL_NAME = 'Skráning lokið (x)';
+var doneIdx = -1;
 
 function loadEdits(){ try{ edits = JSON.parse(localStorage.getItem(LS_EDITS)) || {}; }catch(e){ edits = {}; } }
 function saveEdits(){ try{ localStorage.setItem(LS_EDITS, JSON.stringify(edits)); }catch(e){ toast('Vistun mistókst — geymsla full?'); } }
+
+/* Býr til dálk fyrir "lokið"-stöðuna í enda skrárins, ef hann er ekki
+   þegar til - svo staðan sé alvöru CSV-gagn sem ferðast með í sync. */
+function ensureDoneColumn(){
+  var idx=-1;
+  for(var i=0;i<header.length;i++){ if((header[i]||'').trim()===DONE_COL_NAME){ idx=i; break; } }
+  if(idx===-1){
+    header.push(DONE_COL_NAME);
+    idx=header.length-1;
+    rawRows.forEach(function(row){ row.push(''); });
+  }
+  doneIdx=idx;
+  // Flyt gamalt "done:true" staðbundið hak (fyrri útgáfa appsins) yfir í dálkinn
+  var migrated=false;
+  Object.keys(edits).forEach(function(fid){
+    var e=edits[fid];
+    if(e && e.done && (!e.v || !e.v[doneIdx])){
+      if(!e.v) e.v={};
+      e.v[doneIdx]='Já';
+      migrated=true;
+    }
+  });
+  if(migrated) saveEdits();
+}
 
 /* ---------- Sviðsgerðir út frá heiti dálks ---------- */
 function fieldType(name){
@@ -290,6 +319,7 @@ function buildFields(){
   for(var i=HORN_IDX+1;i<header.length;i++){
     var name=(header[i]||'').trim();
     if(name==='') continue;
+    if(i===doneIdx) continue; // sérstaklega höndlað með "Skráningu lokið" hakinu
     if(name.toLowerCase().indexOf('ljósmynd')!==-1){
       ljosIdx = i;
       fields.push({ index:i, name:name, type:'photos' });
@@ -322,15 +352,11 @@ function displayName(p){
   return p.ng || ('fid '+p.fid);
 }
 function pointStatus(p){
-  var e = edits[p.fid];
-  if(e){
-    if(e.done) return 'green';
-    for(var k in e.v){ if(e.v[k]!=='') return 'amber'; }
-  }
-  // Gildi sem komu inn með miðlægu skránni (skráð af öðrum) telja sem "í vinnslu"
-  var row=rawRows[p.rowIndex];
+  // "Lokið" er sjálfur CSV-dálkurinn doneIdx - því er staðan sú sama
+  // hvort sem gildið kom frá þessu tæki eða úr miðlægu skránni eftir sync.
+  if(doneIdx!==-1 && (getVal(p,doneIdx)||'').trim()!=='') return 'green';
   for(var i=0;i<fields.length;i++){
-    if(((row[fields[i].index])||'').trim()!=='') return 'amber';
+    if(((getVal(p,fields[i].index))||'').trim()!=='') return 'amber';
   }
   return 'gray';
 }
@@ -351,6 +377,7 @@ function applyCsv(text){
   if(header.length < HORN_IDX+2 || (header[COL.x]||'').trim().toUpperCase()!=='X'){
     toast('Óvænt CSV-snið — X-dálkur fannst ekki á réttum stað'); return false;
   }
+  ensureDoneColumn();
   buildFields();
   buildPoints();
   try{ localStorage.setItem(LS_CSV, text); }catch(e){}
@@ -428,7 +455,7 @@ function getVal(p, colIdx){
   return (rawRows[p.rowIndex][colIdx]||'').trim();
 }
 function setVal(fid, colIdx, value){
-  if(!edits[fid]) edits[fid]={v:{},done:false};
+  if(!edits[fid]) edits[fid]={v:{}};
   edits[fid].v[colIdx]=value;
   saveEdits(); updateProgress();
 }
@@ -487,7 +514,7 @@ function openForm(fid){
       refreshBadge();
     });
   });
-  $('#f-done').checked = !!(edits[fid] && edits[fid].done);
+  $('#f-done').checked = (getVal(p,doneIdx)||'').trim()!=='';
   renderPhotoBlock(p);
   show('form');
   window.scrollTo(0,0);
@@ -502,9 +529,8 @@ function refreshBadge(){
 }
 $('#f-done').addEventListener('change', function(){
   if(!currentFid) return;
-  if(!edits[currentFid]) edits[currentFid]={v:{},done:false};
-  edits[currentFid].done=$('#f-done').checked;
-  saveEdits(); updateProgress(); refreshBadge();
+  setVal(currentFid, doneIdx, $('#f-done').checked ? 'Já' : '');
+  refreshBadge();
   // Þegar skráningu er lokið er miðlæga CSV-skráin á GitHub uppfærð sjálfkrafa
   if($('#f-done').checked) queueSync();
 });
@@ -833,6 +859,14 @@ function mergeEditsIntoCsv(remoteText){
   var rows=parseCsvText(remoteText);
   if(rows.length<2) return null;
   var rHeader=rows[0];
+  // Fyrsta sync frá hvaða tæki sem er bætir "lokið"-dálknum við miðlægu
+  // skrána, sé hann ekki þegar til - annars myndi hakið hvergi vistast.
+  var hasDone=false;
+  for(var di=0;di<rHeader.length;di++){ if((rHeader[di]||'').trim()===DONE_COL_NAME){ hasDone=true; break; } }
+  if(!hasDone){
+    rHeader.push(DONE_COL_NAME);
+    for(var dr=1;dr<rows.length;dr++) rows[dr].push('');
+  }
   var remoteIdx={};
   rHeader.forEach(function(h,i){ remoteIdx[h.trim()]=i; });
   var localName={};
@@ -856,11 +890,20 @@ var syncTimer=null, syncing=false;
 function queueSync(){
   if(!ghConfigured()) return;
   clearTimeout(syncTimer);
-  syncTimer=setTimeout(function(){ syncToGitHub(true,false); },1500);
+  syncTimer=setTimeout(function(){ runSync(true); },1500);
 }
 function setGhStatus(text){
   var el=document.getElementById('gh-status');
   if(el) el.textContent=text;
+}
+/* Ysta skel um syncToGitHub - lætur sync-hnappinn á aðalsíðunni snúast
+   meðan samstilling er í gangi, óháð því hvaðan kallið kom. */
+function runSync(push){
+  var btn=document.getElementById('btn-sync');
+  if(btn) btn.classList.add('spinning');
+  return syncToGitHub(push,false).finally(function(){
+    if(btn) btn.classList.remove('spinning');
+  });
 }
 function syncToGitHub(push,isRetry){
   var cfg=ghCfg();
@@ -944,11 +987,19 @@ document.getElementById('gh-save').addEventListener('click',function(){
 });
 document.getElementById('gh-sync').addEventListener('click',function(){
   saveGhCfg();
-  syncToGitHub(true,false);
+  runSync(true);
 });
 document.getElementById('gh-fetch').addEventListener('click',function(){
   saveGhCfg();
-  syncToGitHub(false,false);
+  runSync(false);
+});
+document.getElementById('btn-sync').addEventListener('click',function(){
+  if(!ghConfigured()){
+    toast('Settu upp GitHub-samstillingu fyrst (⚙)');
+    document.getElementById('btn-settings').click();
+    return;
+  }
+  runSync(true);
 });
 
 /* ---------- Kort ---------- */
@@ -1140,7 +1191,7 @@ renderFooter('list');
 openDB().then(initialLoad);
 // Sækjum nýjustu miðlægu skrána af GitHub við ræsingu (ef stillt)
 if(ghConfigured()){
-  setTimeout(function(){ syncToGitHub(false,false); },2000);
+  setTimeout(function(){ runSync(false); },2000);
 }
 </script>
 </body>
