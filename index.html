@@ -242,7 +242,7 @@
    ============================================================ */
 
 var ISN93 = '+proj=lcc +lat_1=64.25 +lat_2=65.75 +lat_0=65 +lon_0=-19 +x_0=500000 +y_0=500000 +ellps=GRS80 +units=m +no_defs +type=crs';
-var CSV_FILE = 'jardkonnun.csv';
+var CSV_FILE = 'Jardkonnun2026_central.csv';
 var LS_CSV = 'jk2026_csv';
 var LS_EDITS = 'jk2026_edits';
 var LS_KKS = 'jk2026_kks';
@@ -454,19 +454,28 @@ function applyCsv(text){
   if(mapInited) renderMapMarkers();
   return true;
 }
-function initialLoad(){
-  var stored = null;
-  try{ stored = localStorage.getItem(LS_CSV); }catch(e){}
-  if(stored){ applyCsv(stored); toast('Gögn sótt úr minni tækisins'); return; }
-  fetch(CSV_FILE).then(function(r){
+function tryLoadBackupFile(){
+  return fetch(CSV_FILE).then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.text();
   }).then(function(t){
     if(applyCsv(t)) toast('CSV hlaðin: '+points.length+' punktar');
+    return true;
   }).catch(function(err){
     console.warn('Náði ekki í '+CSV_FILE+':', err.message);
-    $('#list-container').innerHTML = '<div class="empty">Engin gögn fundust.<br>Ýttu á „Flytja inn CSV“ og veldu Jardkonnun2026input.csv</div>';
+    $('#list-container').innerHTML = '<div class="empty">Engin gögn fundust.<br>'
+      +'<button class="btn btn-primary" id="btn-load-backup" style="width:auto;margin-top:10px;padding:10px 16px">⤓ Sækja backup-skrá ('+esc(CSV_FILE)+')</button><br>'
+      +'<span style="display:inline-block;margin-top:10px">eða ýttu á „Flytja inn CSV“ hér að neðan.</span></div>';
+    var btn=document.getElementById('btn-load-backup');
+    if(btn) btn.onclick=function(){ btn.disabled=true; btn.textContent='Sæki...'; tryLoadBackupFile(); };
+    return false;
   });
+}
+function initialLoad(){
+  var stored = null;
+  try{ stored = localStorage.getItem(LS_CSV); }catch(e){}
+  if(stored){ applyCsv(stored); toast('Gögn sótt úr minni tækisins'); return; }
+  tryLoadBackupFile();
 }
 
 /* ---------- Listi ---------- */
