@@ -32,8 +32,9 @@
   .app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
   header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:1200}
-  .logo{width:36px;height:36px;background:var(--red);border-radius:6px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
-  .logo svg{width:24px;height:24px;display:block}
+  .logo{width:36px;height:36px;background:var(--red);border-radius:6px;flex:0 0 auto;overflow:hidden}
+  .logo img{width:100%;height:100%;object-fit:cover;display:block}
+  #hdr-sub{cursor:pointer}
   header h1{font-size:15px;letter-spacing:.12em;text-transform:uppercase;margin:0;font-weight:700}
   header .sub{font-size:11px;color:var(--muted);letter-spacing:.06em}
 
@@ -126,14 +127,7 @@
 <div class="app">
   <header>
     <div class="logo" role="img" aria-label="EFLA">
-      <svg viewBox="425 350 1290 1290" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" aria-hidden="true">
-        <path d="M1000.27,1125.77 C1030.83,1168.64 1045.98,1215.85 1045.39,1267.68 C1044.07,1381.82 963.40,1478.40 851.17,1499.29 C717.94,1524.09 597.73,1435.03 573.74,1311.73 C548.87,1183.89 628.92,1059.32 756.36,1033.00 C851.62,1013.33 931.69,1043.12 994.39,1118.04 C996.31,1120.34 998.04,1122.80 1000.27,1125.77 z"/>
-        <path d="M1485.76,1223.77 C1437.95,1270.74 1360.84,1255.92 1333.25,1197.43 C1305.38,1138.35 1344.84,1069.66 1409.58,1063.44 C1459.23,1058.68 1501.67,1092.73 1510.83,1136.73 C1517.70,1169.74 1509.33,1198.64 1485.76,1223.77 z"/>
-        <path d="M1449.32,564.47 C1482.22,577.12 1503.17,599.76 1510.83,633.47 C1522.98,686.95 1487.06,737.26 1435.94,746.77 C1384.47,756.35 1334.07,721.47 1325.71,669.78 C1317.21,617.21 1351.71,568.90 1404.17,560.59 C1419.08,558.23 1434.07,559.29 1449.32,564.47 z"/>
-        <path d="M1614.12,375.81 C1654.70,358.86 1699.61,386.48 1701.91,430.68 C1703.52,461.46 1682.33,489.42 1652.00,495.27 C1616.99,502.03 1590.93,482.50 1580.55,457.27 C1568.99,429.18 1579.67,396.54 1605.49,380.31 C1608.01,378.72 1610.76,377.48 1614.12,375.81 z"/>
-        <path d="M926.17,625.84 C964.06,612.91 1001.62,638.25 1008.59,673.04 C1013.07,695.40 1003.56,725.68 977.83,740.16 C954.50,753.29 925.27,750.43 905.21,732.72 C871.45,702.93 878.62,648.80 918.99,628.81 C921.07,627.78 923.26,626.97 926.17,625.84 z"/>
-        <path d="M453.34,1600.52 C432.34,1567.27 445.37,1521.50 484.14,1507.44 C508.04,1498.77 530.44,1502.83 549.09,1520.34 C567.98,1538.09 573.85,1560.40 566.07,1585.12 C558.42,1609.42 541.33,1624.21 515.96,1628.19 C489.70,1632.32 469.18,1622.34 453.34,1600.52 z"/>
-      </svg>
+      <img src="efla-logo.png" alt="EFLA">
     </div>
     <div>
       <h1>Jarðkönnun 2026</h1>
@@ -195,6 +189,18 @@
 <input type="file" id="photo-input" accept="image/*" capture="environment" multiple style="display:none">
 <input type="file" id="layer-input" accept=".zip,.geojson,.json,application/zip,application/json" style="display:none">
 
+<dialog id="dlg-kks">
+  <h2 style="margin-top:0">Línuheiti / KKS</h2>
+  <label for="kks-input">Veldu línuheiti/KKS fyrir þessa lotu</label>
+  <input id="kks-input" list="kks-list" placeholder="t.d. BLA3" autocomplete="off">
+  <datalist id="kks-list"></datalist>
+  <div class="hint">Notað til að merkja skráða punkta og ljósmyndir sjálfkrafa. Hægt er að breyta síðar með því að smella á línuna undir titlinum.</div>
+  <div class="row">
+    <button class="btn btn-ghost" id="kks-cancel">Hætta við</button>
+    <button class="btn btn-primary" id="kks-save">Vista</button>
+  </div>
+</dialog>
+
 <dialog id="dlg-gh">
   <h2 style="margin-top:0">GitHub-samstilling</h2>
   <label for="gh-repo">Repo (eigandi/nafn)</label>
@@ -230,7 +236,7 @@
 <script>
 "use strict";
 /* ============================================================
-   EFLA Jarðkönnun 2026 — Blöndulína 3
+   EFLA Jarðkönnun 2026
    Les mastrapunkta úr CSV (ISN93). Útfylling í mörkinni vistast
    staðbundið (localStorage) og flyst út sem sama CSV-snið.
    ============================================================ */
@@ -239,6 +245,7 @@ var ISN93 = '+proj=lcc +lat_1=64.25 +lat_2=65.75 +lat_0=65 +lon_0=-19 +x_0=50000
 var CSV_FILE = 'jardkonnun.csv';
 var LS_CSV = 'jk2026_csv';
 var LS_EDITS = 'jk2026_edits';
+var LS_KKS = 'jk2026_kks';
 var LABEL_MIN_ZOOM = 13;
 
 /* Fyrstu dálkarnir (0..HORN_IDX) eru forútfylltir og aðeins til sýnis */
@@ -280,9 +287,48 @@ var edits = {};   // { fid: { v:{colIdx:value} } } - "lokið" er sjálfur dálku
 var userPos = null;
 var DONE_COL_NAME = 'Skráning lokið (x)';
 var doneIdx = -1;
+var KKS_COL_NAME = 'Línuheiti/KKS';
+var kksIdx = -1;
+var currentKks = '';
 
 function loadEdits(){ try{ edits = JSON.parse(localStorage.getItem(LS_EDITS)) || {}; }catch(e){ edits = {}; } }
 function saveEdits(){ try{ localStorage.setItem(LS_EDITS, JSON.stringify(edits)); }catch(e){ toast('Vistun mistókst — geymsla full?'); } }
+function loadKks(){ try{ currentKks = localStorage.getItem(LS_KKS) || ''; }catch(e){ currentKks = ''; } }
+function saveKks(v){
+  currentKks = (v||'').trim();
+  try{ localStorage.setItem(LS_KKS, currentKks); }catch(e){}
+  updateProgress();
+}
+/* Safnar línuheitum/KKS sem þegar hafa verið notuð, til að stinga upp á í valglugganum */
+function knownKksValues(){
+  var set = {};
+  if(kksIdx!==-1){
+    rawRows.forEach(function(row){ var v=(row[kksIdx]||'').trim(); if(v) set[v]=1; });
+  }
+  Object.keys(edits).forEach(function(fid){
+    var e=edits[fid];
+    if(e && e.v && kksIdx!==-1 && e.v[kksIdx]){ var v=e.v[kksIdx].trim(); if(v) set[v]=1; }
+  });
+  if(currentKks) set[currentKks]=1;
+  return Object.keys(set).sort();
+}
+function openKksDialog(){
+  var dl=$('#kks-list');
+  dl.innerHTML = knownKksValues().map(function(v){ return '<option value="'+esc(v)+'">'; }).join('');
+  $('#kks-input').value = currentKks;
+  $('#dlg-kks').showModal();
+}
+/* Merkir punkt með völdu línuheiti/KKS ef hann er ekki þegar merktur - kallað
+   um leið og eitthvað er skráð á punktinn, svo eldri punktar úr öðrum lotum
+   haldi sínu upprunalega gildi. */
+function ensureKksStamped(fid){
+  if(kksIdx===-1 || !currentKks) return;
+  var p=points.filter(function(x){return x.fid===fid;})[0];
+  if(!p) return;
+  if((getVal(p,kksIdx)||'').trim()) return;
+  if(!edits[fid]) edits[fid]={v:{}};
+  edits[fid].v[kksIdx]=currentKks;
+}
 
 /* Býr til dálk fyrir "lokið"-stöðuna í enda skrárins, ef hann er ekki
    þegar til - svo staðan sé alvöru CSV-gagn sem ferðast með í sync. */
@@ -308,6 +354,19 @@ function ensureDoneColumn(){
   if(migrated) saveEdits();
 }
 
+/* Býr til dálk fyrir línuheiti/KKS, ef hann er ekki þegar til - sama mynstur
+   og "lokið"-dálkurinn hér að ofan. */
+function ensureKksColumn(){
+  var idx=-1;
+  for(var i=0;i<header.length;i++){ if((header[i]||'').trim()===KKS_COL_NAME){ idx=i; break; } }
+  if(idx===-1){
+    header.push(KKS_COL_NAME);
+    idx=header.length-1;
+    rawRows.forEach(function(row){ row.push(''); });
+  }
+  kksIdx=idx;
+}
+
 /* ---------- Sviðsgerðir út frá heiti dálks ---------- */
 function fieldType(name){
   var n = name.toLowerCase();
@@ -327,6 +386,7 @@ function buildFields(){
     var name=(header[i]||'').trim();
     if(name==='') continue;
     if(i===doneIdx) continue; // sérstaklega höndlað með "Skráningu lokið" hakinu
+    if(i===kksIdx) continue; // sérstaklega höndlað - stimplast sjálfkrafa af völdu línuheiti/KKS
     if(name.toLowerCase().indexOf('ljósmynd')!==-1){
       ljosIdx = i;
       fields.push({ index:i, name:name, type:'photos' });
@@ -372,7 +432,8 @@ function statusColor(st){ return st==='green' ? '#3ecf8e' : st==='amber' ? '#f4b
 function updateProgress(){
   var done=0;
   points.forEach(function(p){ if(pointStatus(p)==='green') done++; });
-  $('#hdr-sub').textContent = points.length ? ('Blöndulína 3 · '+done+' af '+points.length+' lokið') : 'Blöndulína 3';
+  var kksLabel = currentKks || 'Veldu línuheiti/KKS';
+  $('#hdr-sub').textContent = points.length ? (kksLabel+' · '+done+' af '+points.length+' lokið') : kksLabel;
 }
 
 /* ---------- Hleðsla CSV ---------- */
@@ -384,6 +445,7 @@ function applyCsv(text){
   if(header.length < HORN_IDX+2 || (header[COL.x]||'').trim().toUpperCase()!=='X'){
     toast('Óvænt CSV-snið — X-dálkur fannst ekki á réttum stað'); return false;
   }
+  ensureKksColumn();
   ensureDoneColumn();
   buildFields();
   buildPoints();
@@ -464,6 +526,7 @@ function getVal(p, colIdx){
 function setVal(fid, colIdx, value){
   if(!edits[fid]) edits[fid]={v:{}};
   edits[fid].v[colIdx]=value;
+  if(colIdx!==kksIdx) ensureKksStamped(fid);
   saveEdits(); updateProgress();
 }
 function openForm(fid){
@@ -489,7 +552,7 @@ function openForm(fid){
     if(f.type==='photos'){
       html+='<label>'+esc(f.name)+'</label>'
         +'<div class="photos" id="photo-block"></div>'
-        +'<div class="hint">Myndir fá heiti punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn. Þær hlaðast sjálfkrafa upp á GitHub með næstu samstillingu.</div>';
+        +'<div class="hint">Myndir fá heiti línu/KKS + punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn. Þær hlaðast sjálfkrafa upp á GitHub með næstu samstillingu.</div>';
       return;
     }
     html+='<label for="'+id+'">'+esc(f.name)+'</label>';
@@ -717,7 +780,8 @@ function processPhotoFile(file,p,seq){
       c.toBlob(function(blob){
         if(!blob){ rej(new Error('JPEG-kóðun mistókst')); return; }
         blob.arrayBuffer().then(function(buf){
-          var name=sanitizeName(displayName(p))+'_'+seq+'.jpg';
+          var kksVal = kksIdx!==-1 ? (getVal(p,kksIdx)||currentKks||'') : (currentKks||'');
+          var name=(kksVal?sanitizeName(kksVal)+'-':'')+sanitizeName(displayName(p))+'_'+seq+'.jpg';
           var final, lat=null, lon=null;
           if(userPos){
             lat=userPos.lat; lon=userPos.lon;
@@ -847,6 +911,7 @@ $('#photo-input').addEventListener('change', function(e){
   if(!db){ toast('Myndageymsla ekki tiltæk'); return; }
   var p=points.filter(function(x){return x.fid===currentFid;})[0];
   if(!p) return;
+  ensureKksStamped(p.fid); saveEdits();
   photosByFid(p.fid).then(function(existing){
     var seq=nextSeq(existing);
     var chain=Promise.resolve();
@@ -1126,6 +1191,15 @@ function syncToGitHub(push,isRetry){
       if(push) toast('GitHub-samstilling mistókst - skráningin er vistuð í tækinu og reynt verður aftur næst.');
     });
 }
+$('#hdr-sub').addEventListener('click', openKksDialog);
+document.getElementById('kks-cancel').addEventListener('click',function(){ document.getElementById('dlg-kks').close(); });
+document.getElementById('kks-save').addEventListener('click',function(){
+  var v=$('#kks-input').value.trim();
+  if(!v){ toast('Sláðu inn línuheiti/KKS'); return; }
+  saveKks(v);
+  document.getElementById('dlg-kks').close();
+  toast('Línuheiti/KKS: '+v);
+});
 document.getElementById('btn-settings').addEventListener('click',function(){
   var cfg=ghCfg()||{};
   $('#gh-repo').value=cfg.repo||'';
@@ -1359,9 +1433,11 @@ if('geolocation' in navigator){
 }
 
 /* ---------- Ræsing ---------- */
+loadKks();
 loadEdits();
 renderFooter('list');
 openDB().then(initialLoad);
+if(!currentKks) openKksDialog();
 // Sækjum nýjustu miðlægu skrána af GitHub við ræsingu (ef stillt)
 if(ghConfigured()){
   setTimeout(function(){ runSync(false); },2000);
