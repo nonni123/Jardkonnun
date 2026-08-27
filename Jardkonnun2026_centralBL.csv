@@ -1,7 +1,7 @@
 ﻿fid;Nr.;Nafn;Gerð;NG;X;Y;Z;H;Lengd;Horn;Unnið af;Dagsetning;tími;Ljósmynd;ALmenn lýsing á Jarðvegsaðstæðum;Til sérstakrar athugunar;Stagfestugerð;Gæði mats (1:borað, 2:pjakkað, 3:metið á staðnum) (V-H-A-F);Dýpi á jarðvatn [m] (V-H-A-F);Þykkt á lífrænu lagi [m] (V-H-A-F);Dýpi á burðarhæft [m] (V-H-A-F);Dýpi á fast [m] (V-H-A-F);Lífrænt efni (V-H-A-F);Yfir burðarhæfu (V-H-A-F);Burðarhæft efni (V-H-A-F);Klöpp (V-H-A-F);Er Nægjanlegt pláss fyrir mastrið, undirstöður, stagfestur og annan búnað?;Eru aðstæður fullnægjandi (fen, skurður, lækjarfarvegur o.s.frv.)?;Er mastrið utan hættusvæðis vegna landsbrots, skriðufalla, snjóflóða o.s.frv.?;Er mastrið utan við tún eða aðra viðkvæma staði?;Er staðbundin snjósöfnun í mastursstæði ólíkleg?;Er hóflegur hliðarhalli í mastursstæði?;Er þörf á sérstökum ráðstöfunum í mastursstæði? Ef þörf, þá hver?;Eru aðstæður í mastursstæði betri ef mastri er hliðrað til?;Leiðir færsla á mastri til þess að færa þurfi næstu möstur?;Er góð aðkoma að mastursstæði;Er þörf á aðkomuslóð (ef ekki, þá hvers vegna?);Er þörf á slóð fyrir jarðvinnutæki?;Er þörf á reisingarplani fyrir krana?;Búið að teikna aðkomuslóð a mynd?;Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei);Mastursstæði er í lagi, ekki þörf á breytingu;Skráning lokið (x)
 1;0;-;Tengiv.;--Tengiv.;461978.9;546408.58;365;10;81;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-2;1;-;FAJ;--FAJ;462007.22;546333.06;368.6;16.5;283;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
-3;2;-;BSJ;--BSJ;462155.85;546092.51;369.8;20;295;;Ástmar Karl Steinarsson;2026-08-26;20:53;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+2;1;-;FAJ;--FAJ;462007.22;546333.06;368.6;16.5;283;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+3;2;-;BSJ;--BSJ;462155.85;546092.51;369.8;20;295;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 4;3;-;BSJ;--BSJ;462310.65;545841.96;371.1;19.5;302;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 5;4;-;BSJ;--BSJ;462469.32;545585.14;371.2;19.5;304;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 6;5;5-B;FAJ;5-B-FAJ;462629.3;545326.21;369.2;20.5;242;-30.2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -298,4 +298,4 @@
 297;296;T7;SHJ;T7-SHJ;538941.3;576290.55;124.8;19.7;172;17.7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 298;297;T8;BMJ;T8-BMJ;539057.57;576164.45;120.1;20;169;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 299;298;-;SHJ;--SHJ;539169.32;576038.32;115.8;13;59;-62.5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-300;299;-;SHEJ;--SHEJ;539227.51;576046.25;115;13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+300;299;-;SHEJ;--SHEJ;539227.51;576046.25;115;13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
