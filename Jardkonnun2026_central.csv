@@ -1,7 +1,7 @@
 ﻿fid;Nr.;Nafn;Gerð;NG;X;Y;Z;H;Lengd;Horn;Unnið af;Dagsetning;tími;Ljósmynd;ALmenn lýsing á Jarðvegsaðstæðum;Til sérstakrar athugunar;Stagfestugerð;Gæði mats (1:borað, 2:pjakkað, 3:metið á staðnum) (V-H-A-F);Dýpi á jarðvatn [m] (V-H-A-F);Þykkt á lífrænu lagi [m] (V-H-A-F);Dýpi á burðarhæft [m] (V-H-A-F);Dýpi á fast [m] (V-H-A-F);Lífrænt efni (V-H-A-F);Yfir burðarhæfu (V-H-A-F);Burðarhæft efni (V-H-A-F);Klöpp (V-H-A-F);Er Nægjanlegt pláss fyrir mastrið, undirstöður, stagfestur og annan búnað?;Eru aðstæður fullnægjandi (fen, skurður, lækjarfarvegur o.s.frv.)?;Er mastrið utan hættusvæðis vegna landsbrots, skriðufalla, snjóflóða o.s.frv.?;Er mastrið utan við tún eða aðra viðkvæma staði?;Er staðbundin snjósöfnun í mastursstæði ólíkleg?;Er hóflegur hliðarhalli í mastursstæði?;Er þörf á sérstökum ráðstöfunum í mastursstæði? Ef þörf, þá hver?;Eru aðstæður í mastursstæði betri ef mastri er hliðrað til?;Leiðir færsla á mastri til þess að færa þurfi næstu möstur?;Er góð aðkoma að mastursstæði;Er þörf á aðkomuslóð (ef ekki, þá hvers vegna?);Er þörf á slóð fyrir jarðvinnutæki?;Er þörf á reisingarplani fyrir krana?;Búið að teikna aðkomuslóð a mynd?;Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei);Mastursstæði er í lagi, ekki þörf á breytingu;Skráning lokið (x)
 1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 2;0;-;Tengiv.;0 Tv. BLA;461972.131;546421.181;;;;;;2026-08-12;;Nr.-0_1.jpg, Nr.-0_2.jpg, Nr.-0_3.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;Já;1;;Já
-3;1;-;FAJ;1 FAJ;461942.483;546472.358;;;;;;;;Nr.-1_1.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
+3;1;-;FAJ;1 FAJ;461942.483;546472.358;;;;;Ástmar Karl Steinarsson;2026-08-26;20:53;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 4;2;-;FAJ;2 FAJ;461784.561;546567.332;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 5;3;-;BSJ;3 BSJ;461717.865;546844.159;;;;;Ástmar ;;;;ég er vinna í þessu;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 6;4;-;SMHJ;4 SMHJ;461680.429;546999.54;;;;;Ástmar ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
@@ -12,11 +12,11 @@
 11;9;7B-B;BS;9 BS;460706.198;548505.255;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 12;10;8-B;BS;10 BS;460519.147;548805.799;;;;;Ástmar ;;;8-B_1.jpg;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 13;11;9-B;BS;11 BS;460343.592;549087.871;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-14;12;10-B;BS;12 BS;460188.455;549337.137;;;;;Ástmar er bestur;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
+14;12;10-B;BS;12 BS;460188.455;549337.137;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 15;13;11-B;BS;13 BS;460047.284;549563.964;;;;;BG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 16;14;12-B;BS;14 BS;459884.956;549824.785;;;;;BG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
 17;15;13-B;BS;15 BS;459710.586;550104.954;;;;;BG;;;;;;;;;;;;;;;;;;;;;;Nei;;;;;;;;;;Já
-18;16;14-B;BS;16 BS;459552.452;550359.034;;;;;Björgvin ;2026-08-26;;14-B_1.jpg;Frekar þungur og leiðinlegur jarðvegur ;Er hann í lagi ;;;;;;;;;;;;;;;;;;;;;;;;;;;Já
+18;16;14-B;BS;16 BS;459552.452;550359.034;;;;;Björgvin ;2026-08-26;;14-B_1.jpg;Frekar þungur og leiðinlegur jarðvegur ;Er hann í lagi ;;;;;;;;;;;;;;;;;;;;;;;;Nei;;;Já
 19;17;15-B;SMH;17 SMH;459385.205;550627.759;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 20;18;16-B;BS;18 BS;459291.791;550882.342;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 21;19;17-B;BS;19 BS;459198.484;551136.634;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
