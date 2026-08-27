@@ -1198,6 +1198,10 @@ function initMap(){
   var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Loftmynd © Esri, Maxar, Earthstar Geographics'});
   osm.addTo(map);
   layersControl=L.control.layers({'Kort (OSM)':osm,'Loftmynd (Esri)':esri},null,{position:'topright'}).addTo(map);
+  map.createPane('linesPane');
+  map.getPane('linesPane').style.zIndex=350;
+  map.createPane('pointsPane');
+  map.getPane('pointsPane').style.zIndex=450;
   markerLayer=L.layerGroup().addTo(map);
   map.on('zoomend', updateMapLabels);
   mapInited=true;
@@ -1233,15 +1237,11 @@ function reprojectIsn93IfNeeded(geojson){
 }
 function addLineLayer(geojson,name){
   var layer=L.geoJSON(geojson,{
-    style:{color:'#d32f2f',weight:3,opacity:.9},
+    pane:'linesPane',
+    interactive:false,
+    style:{color:'#000',weight:1,opacity:.85},
     pointToLayer:function(f,latlng){
-      return L.circleMarker(latlng,{radius:5,color:'#fff',weight:1,fillColor:'#d32f2f',fillOpacity:.9});
-    },
-    onEachFeature:function(feature,fl){
-      var props=feature.properties||{};
-      var keys=Object.keys(props).filter(function(k){ return props[k]!==null&&props[k]!==''; });
-      if(!keys.length) return;
-      fl.bindPopup(keys.map(function(k){ return '<b>'+esc(k)+':</b> '+esc(props[k]); }).join('<br>'));
+      return L.circleMarker(latlng,{pane:'linesPane',interactive:false,radius:3,color:'#fff',weight:1,fillColor:'#000',fillOpacity:.85});
     }
   });
   layer.addTo(map);
@@ -1316,7 +1316,7 @@ function renderMapMarkers(){
   var latlngs=[];
   points.forEach(function(p){
     var st=pointStatus(p);
-    var m=L.circleMarker([p.lat,p.lon],{radius:7,color:'#fff',weight:1.5,fillColor:statusColor(st),fillOpacity:.95});
+    var m=L.circleMarker([p.lat,p.lon],{pane:'pointsPane',radius:7,color:'#fff',weight:1.5,fillColor:statusColor(st),fillOpacity:.95});
     var gm='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat.toFixed(6)+','+p.lon.toFixed(6))+'&travelmode=driving';
     m.bindPopup('<b>'+esc(displayName(p))+'</b><br>'+esc(p.gerd)+(p.ng?' · '+esc(p.ng):'')
       +'<br>'+(st==='green'?'Lokið':st==='amber'?'Í vinnslu':'Óskráð')
