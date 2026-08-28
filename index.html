@@ -390,6 +390,30 @@ var MAST_COND_NAMES = {
   'Búið að teikna aðkomuslóð a mynd?':1,
   'Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei)':1
 };
+var soilIdx = -1; // "Er jarðvegsmat framkvæmt?" - stýrir sýnileika SOIL_COND_NAMES
+var SOIL_COL_NAME = 'Er jarðvegsmat framkvæmt?';
+var SOIL_COND_NAMES = {
+  'Gæði mats (1:borað, 2:pjakkað, 3:metið á staðnum) (V-H-A-F)':1,
+  'Dýpi á jarðvatn [m] (V-H-A-F)':1,
+  'Þykkt á lífrænu lagi [m] (V-H-A-F)':1,
+  'Dýpi á burðarhæft [m] (V-H-A-F)':1,
+  'Dýpi á fast [m] (V-H-A-F)':1,
+  'Lífrænt efni (V-H-A-F)':1,
+  'Yfir burðarhæfu (V-H-A-F)':1,
+  'Burðarhæft efni (V-H-A-F)':1,
+  'Klöpp (V-H-A-F)':1
+};
+/* Býr til dálk fyrir "Er jarðvegsmat framkvæmt?", ef hann er ekki þegar til. */
+function ensureSoilColumn(){
+  var idx=-1;
+  for(var i=0;i<header.length;i++){ if((header[i]||'').trim()===SOIL_COL_NAME){ idx=i; break; } }
+  if(idx===-1){
+    header.push(SOIL_COL_NAME);
+    idx=header.length-1;
+    rawRows.forEach(function(row){ row.push(''); });
+  }
+  soilIdx=idx;
+}
 function buildFields(){
   fields = [];
   ljosIdx = -1;
@@ -409,7 +433,12 @@ function buildFields(){
       fields.push({ index:i, name:name, type:'mastok' });
       continue;
     }
-    fields.push({ index:i, name:name, type:fieldType(name), conditional: !!MAST_COND_NAMES[name] });
+    if(name===SOIL_COL_NAME){
+      soilIdx = i;
+      fields.push({ index:i, name:name, type:'soilassess' });
+      continue;
+    }
+    fields.push({ index:i, name:name, type:fieldType(name), conditional: !!MAST_COND_NAMES[name], soilConditional: !!SOIL_COND_NAMES[name] });
   }
   // Færa "mastok" reitinn til - á að birtast rétt á undan fyrstu skilyrtu
   // spurningunni (þ.e. næst á eftir "Klöpp"), ekki aftast eins og röð CSV-dálka gefur til kynna.
@@ -418,6 +447,14 @@ function buildFields(){
     var mastField = fields.splice(mastPos,1)[0];
     var firstCondPos = fields.findIndex(function(f){ return f.conditional; });
     fields.splice(firstCondPos===-1?fields.length:firstCondPos, 0, mastField);
+  }
+  // Færa "soilassess" reitinn til - á að birtast rétt á undan fyrstu jarðvegsmats-
+  // spurningunni (þ.e. næst á eftir "Stagfestugerð").
+  var soilPos = fields.findIndex(function(f){ return f.type==='soilassess'; });
+  if(soilPos!==-1){
+    var soilField = fields.splice(soilPos,1)[0];
+    var firstSoilCondPos = fields.findIndex(function(f){ return f.soilConditional; });
+    fields.splice(firstSoilCondPos===-1?fields.length:firstSoilCondPos, 0, soilField);
   }
 }
 
@@ -471,6 +508,7 @@ function applyCsv(text){
     toast('Óvænt CSV-snið — X-dálkur fannst ekki á réttum stað'); return false;
   }
   ensureKksColumn();
+  ensureSoilColumn();
   ensureDoneColumn();
   buildFields();
   buildPoints();
@@ -582,10 +620,14 @@ function openForm(fid){
   var html='';
   var mastOkVal = mastOkIdx!==-1 ? getVal(p,mastOkIdx) : '';
   var condVisible = mastOkVal==='Nei'; // sjálfgefið "Já" - falin svæði þá
+  var soilVal = soilIdx!==-1 ? getVal(p,soilIdx) : '';
+  var soilVisible = soilVal==='Já'; // sjálfgefið "Nei" - falin svæði þá
   fields.forEach(function(f){
     var val=getVal(p,f.index);
     var id='fld-'+f.index;
-    var wrapOpen = f.conditional ? '<div class="mast-cond" style="display:'+(condVisible?'block':'none')+'">' : '<div>';
+    var wrapOpen = f.conditional ? '<div class="mast-cond" style="display:'+(condVisible?'block':'none')+'">'
+      : f.soilConditional ? '<div class="soil-cond" style="display:'+(soilVisible?'block':'none')+'">'
+      : '<div>';
     if(f.type==='photos'){
       html+='<label>'+esc(f.name)+'</label>'
         +'<div class="photos" id="photo-block"></div>'
@@ -598,6 +640,12 @@ function openForm(fid){
       html+='<select id="'+id+'" data-col="'+f.index+'">'
         +'<option value="Já"'+(mv==='Já'?' selected':'')+'>Já</option>'
         +'<option value="Nei"'+(mv==='Nei'?' selected':'')+'>Nei</option>'
+        +'</select>';
+    } else if(f.type==='soilassess'){
+      var sv = val==='Já' ? 'Já' : 'Nei'; // sjálfgefið Nei
+      html+='<select id="'+id+'" data-col="'+f.index+'">'
+        +'<option value="Nei"'+(sv==='Nei'?' selected':'')+'>Nei</option>'
+        +'<option value="Já"'+(sv==='Já'?' selected':'')+'>Já</option>'
         +'</select>';
     } else if(f.type==='textarea'){
       html+='<textarea id="'+id+'" data-col="'+f.index+'">'+esc(val)+'</textarea>';
@@ -630,6 +678,10 @@ function openForm(fid){
       if(colIdx===mastOkIdx){
         var show=el.value==='Nei';
         $('#f-fields').querySelectorAll('.mast-cond').forEach(function(w){ w.style.display=show?'block':'none'; });
+      }
+      if(colIdx===soilIdx){
+        var showSoil=el.value==='Já';
+        $('#f-fields').querySelectorAll('.soil-cond').forEach(function(w){ w.style.display=showSoil?'block':'none'; });
       }
     });
   });
