@@ -189,20 +189,13 @@
 <input type="file" id="photo-input" accept="image/*" capture="environment" multiple style="display:none">
 <input type="file" id="layer-input" accept=".zip,.geojson,.json,application/zip,application/json" style="display:none">
 
-<dialog id="dlg-kks">
-  <h2 style="margin-top:0">Línuheiti / KKS</h2>
-  <label for="kks-input">Veldu línuheiti/KKS fyrir þessa lotu</label>
+<dialog id="dlg-gh">
+  <h2 style="margin-top:0">Stillingar</h2>
+  <label for="kks-input">Línuheiti / KKS</label>
   <input id="kks-input" list="kks-list" placeholder="t.d. BLA3" autocomplete="off">
   <datalist id="kks-list"></datalist>
-  <div class="hint">Notað til að merkja skráða punkta og ljósmyndir sjálfkrafa. Hægt er að breyta síðar með því að smella á línuna undir titlinum.</div>
-  <div class="row">
-    <button class="btn btn-ghost" id="kks-cancel">Hætta við</button>
-    <button class="btn btn-primary" id="kks-save">Vista</button>
-  </div>
-</dialog>
-
-<dialog id="dlg-gh">
-  <h2 style="margin-top:0">GitHub-samstilling</h2>
+  <div class="hint">Notað til að merkja skráða punkta og ljósmyndir sjálfkrafa.</div>
+  <h2 style="margin-top:22px">GitHub-samstilling</h2>
   <label for="gh-repo">Repo (eigandi/nafn)</label>
   <input id="gh-repo" placeholder="t.d. efla-verk/jardkonnun2026" autocomplete="off">
   <label for="gh-path">Skráarheiti í repo</label>
@@ -312,11 +305,10 @@ function knownKksValues(){
   if(currentKks) set[currentKks]=1;
   return Object.keys(set).sort();
 }
-function openKksDialog(){
+function populateKksField(){
   var dl=$('#kks-list');
   dl.innerHTML = knownKksValues().map(function(v){ return '<option value="'+esc(v)+'">'; }).join('');
   $('#kks-input').value = currentKks;
-  $('#dlg-kks').showModal();
 }
 /* Merkir punkt með völdu línuheiti/KKS ef hann er ekki þegar merktur - kallað
    um leið og eitthvað er skráð á punktinn, svo eldri punktar úr öðrum lotum
@@ -379,9 +371,29 @@ function fieldType(name){
   return 'text';
 }
 var ljosIdx = -1; // dálkurinn "Ljósmynd" - fær sjálfvirkt myndanöfn
+var mastOkIdx = -1; // "Mastursstæði er í lagi..." - stýrir sýnileika MAST_COND_NAMES
+var MAST_OK_NAME = 'Mastursstæði er í lagi, ekki þörf á breytingu';
+var MAST_COND_NAMES = {
+  'Er Nægjanlegt pláss fyrir mastrið, undirstöður, stagfestur og annan búnað?':1,
+  'Eru aðstæður fullnægjandi (fen, skurður, lækjarfarvegur o.s.frv.)?':1,
+  'Er mastrið utan hættusvæðis vegna landsbrots, skriðufalla, snjóflóða o.s.frv.?':1,
+  'Er mastrið utan við tún eða aðra viðkvæma staði?':1,
+  'Er staðbundin snjósöfnun í mastursstæði ólíkleg?':1,
+  'Er hóflegur hliðarhalli í mastursstæði?':1,
+  'Er þörf á sérstökum ráðstöfunum í mastursstæði? Ef þörf, þá hver?':1,
+  'Eru aðstæður í mastursstæði betri ef mastri er hliðrað til?':1,
+  'Leiðir færsla á mastri til þess að færa þurfi næstu möstur?':1,
+  'Er góð aðkoma að mastursstæði':1,
+  'Er þörf á aðkomuslóð (ef ekki, þá hvers vegna?)':1,
+  'Er þörf á slóð fyrir jarðvinnutæki?':1,
+  'Er þörf á reisingarplani fyrir krana?':1,
+  'Búið að teikna aðkomuslóð a mynd?':1,
+  'Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei)':1
+};
 function buildFields(){
   fields = [];
   ljosIdx = -1;
+  mastOkIdx = -1;
   for(var i=HORN_IDX+1;i<header.length;i++){
     var name=(header[i]||'').trim();
     if(name==='') continue;
@@ -392,7 +404,20 @@ function buildFields(){
       fields.push({ index:i, name:name, type:'photos' });
       continue;
     }
-    fields.push({ index:i, name:name, type:fieldType(name) });
+    if(name===MAST_OK_NAME){
+      mastOkIdx = i;
+      fields.push({ index:i, name:name, type:'mastok' });
+      continue;
+    }
+    fields.push({ index:i, name:name, type:fieldType(name), conditional: !!MAST_COND_NAMES[name] });
+  }
+  // Færa "mastok" reitinn til - á að birtast rétt á undan fyrstu skilyrtu
+  // spurningunni (þ.e. næst á eftir "Klöpp"), ekki aftast eins og röð CSV-dálka gefur til kynna.
+  var mastPos = fields.findIndex(function(f){ return f.type==='mastok'; });
+  if(mastPos!==-1){
+    var mastField = fields.splice(mastPos,1)[0];
+    var firstCondPos = fields.findIndex(function(f){ return f.conditional; });
+    fields.splice(firstCondPos===-1?fields.length:firstCondPos, 0, mastField);
   }
 }
 
@@ -555,17 +580,26 @@ function openForm(fid){
     +'<div class="kv"><span class="k">Z / Lengd</span><span class="v">'+esc(p.z||'—')+' m / '+(isFinite(p.lengd)?p.lengd.toFixed(2):'—')+' km</span></div>';
 
   var html='';
+  var mastOkVal = mastOkIdx!==-1 ? getVal(p,mastOkIdx) : '';
+  var condVisible = mastOkVal==='Nei'; // sjálfgefið "Já" - falin svæði þá
   fields.forEach(function(f){
     var val=getVal(p,f.index);
     var id='fld-'+f.index;
+    var wrapOpen = f.conditional ? '<div class="mast-cond" style="display:'+(condVisible?'block':'none')+'">' : '<div>';
     if(f.type==='photos'){
       html+='<label>'+esc(f.name)+'</label>'
         +'<div class="photos" id="photo-block"></div>'
         +'<div class="hint">Myndir fá heiti línu/KKS + punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn. Þær hlaðast sjálfkrafa upp á GitHub með næstu samstillingu.</div>';
       return;
     }
-    html+='<label for="'+id+'">'+esc(f.name)+'</label>';
-    if(f.type==='textarea'){
+    html+=wrapOpen+'<label for="'+id+'">'+esc(f.name)+'</label>';
+    if(f.type==='mastok'){
+      var mv = val==='Nei' ? 'Nei' : 'Já'; // sjálfgefið Já
+      html+='<select id="'+id+'" data-col="'+f.index+'">'
+        +'<option value="Já"'+(mv==='Já'?' selected':'')+'>Já</option>'
+        +'<option value="Nei"'+(mv==='Nei'?' selected':'')+'>Nei</option>'
+        +'</select>';
+    } else if(f.type==='textarea'){
       html+='<textarea id="'+id+'" data-col="'+f.index+'">'+esc(val)+'</textarea>';
     } else if(f.type==='select'){
       html+='<select id="'+id+'" data-col="'+f.index+'">'
@@ -584,13 +618,19 @@ function openForm(fid){
       html+='<input id="'+id+'" type="'+t+'" data-col="'+f.index+'" value="'+esc(val)+'" autocomplete="off">';
       if(f.name.indexOf('V-H-A-F')!==-1) html+='<div class="hint">Fjögur gildi, eitt á hvern fót: V-H-A-F</div>';
     }
+    html+='</div>';
   });
   $('#f-fields').innerHTML=html;
   $('#f-fields').querySelectorAll('input,textarea,select').forEach(function(el){
     var ev = el.tagName==='SELECT'?'change':'input';
     el.addEventListener(ev, function(){
-      setVal(currentFid, parseInt(el.dataset.col,10), el.value);
+      var colIdx=parseInt(el.dataset.col,10);
+      setVal(currentFid, colIdx, el.value);
       refreshBadge();
+      if(colIdx===mastOkIdx){
+        var show=el.value==='Nei';
+        $('#f-fields').querySelectorAll('.mast-cond').forEach(function(w){ w.style.display=show?'block':'none'; });
+      }
     });
   });
   $('#f-done').checked = (getVal(p,doneIdx)||'').trim()!=='';
@@ -1200,17 +1240,9 @@ function syncToGitHub(push,isRetry){
       if(push) toast('GitHub-samstilling mistókst - skráningin er vistuð í tækinu og reynt verður aftur næst.');
     });
 }
-$('#hdr-sub').addEventListener('click', openKksDialog);
-document.getElementById('kks-cancel').addEventListener('click',function(){ document.getElementById('dlg-kks').close(); });
-document.getElementById('kks-save').addEventListener('click',function(){
-  var v=$('#kks-input').value.trim();
-  if(!v){ toast('Sláðu inn línuheiti/KKS'); return; }
-  saveKks(v);
-  document.getElementById('dlg-kks').close();
-  toast('Línuheiti/KKS: '+v);
-});
-document.getElementById('btn-settings').addEventListener('click',function(){
+function openSettingsDialog(){
   var cfg=ghCfg()||{};
+  populateKksField();
   $('#gh-repo').value=cfg.repo||'';
   $('#gh-path').value=cfg.path||'Jardkonnun2026_central.csv';
   $('#gh-branch').value=cfg.branch||'main';
@@ -1220,7 +1252,12 @@ document.getElementById('btn-settings').addEventListener('click',function(){
   try{ last=parseInt(localStorage.getItem(LS_LASTSYNC),10); }catch(e){}
   setGhStatus(last?('Síðast samstillt: '+new Date(last).toLocaleString('is-IS')):'Aldrei samstillt í þessu tæki.');
   document.getElementById('dlg-gh').showModal();
+}
+$('#hdr-sub').addEventListener('click', openSettingsDialog);
+$('#kks-input').addEventListener('change',function(){
+  saveKks($('#kks-input').value);
 });
+document.getElementById('btn-settings').addEventListener('click', openSettingsDialog);
 document.getElementById('gh-close').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); });
 function saveGhCfg(){
   var cfg={
@@ -1446,7 +1483,6 @@ loadKks();
 loadEdits();
 renderFooter('list');
 openDB().then(initialLoad);
-if(!currentKks) openKksDialog();
 // Sækjum nýjustu miðlægu skrána af GitHub við ræsingu (ef stillt)
 if(ghConfigured()){
   setTimeout(function(){ runSync(false); },2000);
