@@ -160,6 +160,7 @@
         <div class="hint" style="margin-top:10px">Grár = óskráð · gulur = í vinnslu · grænn = lokið. Númer birtast þegar zoomað er inn.</div>
         <button class="btn btn-ghost" id="btn-layers" style="margin-top:10px">⬆ Bæta við lagi (shapefile-zip / GeoJSON)</button>
         <div class="hint" style="margin-top:6px">Zip þarf að innihalda .shp og .dbf (helst líka .prj). Lagið vistast í tækinu og hægt er að kveikja/slökkva á því í lagavalinu á kortinu.</div>
+        <div id="layer-list"></div>
       </div>
     </section>
 
@@ -1382,6 +1383,9 @@ function initMap(){
 
 /* ---------- GIS-lög (shapefile-zip / GeoJSON) ---------- */
 var LS_LINES='jk2026_lines';
+var LINE_PALETTE=['#000000','#1a73e8','#e64a19','#43a047','#8e24aa','#fbc02d','#00838f','#c2185b'];
+var customLayers=[]; // { name, color, layer, geojson }
+function nextLineColor(){ return LINE_PALETTE[customLayers.length % LINE_PALETTE.length]; }
 function reprojectIsn93IfNeeded(geojson){
   var needs=false;
   function walk(coords,fn){
@@ -1407,17 +1411,48 @@ function reprojectIsn93IfNeeded(geojson){
   });
   return geojson;
 }
-function addLineLayer(geojson,name){
+function addLineLayer(geojson,name,color){
+  color = color || nextLineColor();
   var layer=L.geoJSON(geojson,{
     pane:'linesPane',
     interactive:false,
-    style:{color:'#000',weight:1,opacity:.85},
+    style:{color:color,weight:1,opacity:.85},
     pointToLayer:function(f,latlng){
-      return L.circleMarker(latlng,{pane:'linesPane',interactive:false,radius:3,color:'#fff',weight:1,fillColor:'#000',fillOpacity:.85});
+      return L.circleMarker(latlng,{pane:'linesPane',interactive:false,radius:3,color:'#fff',weight:1,fillColor:color,fillOpacity:.85});
     }
   });
   layer.addTo(map);
   layersControl.addOverlay(layer,esc(name));
+  customLayers.push({name:name,color:color,layer:layer});
+  renderLayerList();
+  return layer;
+}
+function setLineLayerColor(entry,color){
+  entry.color=color;
+  entry.layer.setStyle({color:color,fillColor:color});
+  var saved=savedLines();
+  var s=saved.filter(function(x){return x.name===entry.name;})[0];
+  if(s){
+    s.color=color;
+    try{ localStorage.setItem(LS_LINES,JSON.stringify(saved)); }catch(e){}
+  }
+}
+function renderLayerList(){
+  var el=$('#layer-list');
+  if(!el) return;
+  if(!customLayers.length){ el.innerHTML=''; return; }
+  el.innerHTML = customLayers.map(function(entry,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0">'
+      +'<input type="color" data-layer-i="'+i+'" value="'+entry.color+'" style="width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;flex:0 0 auto">'
+      +'<span style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(entry.name)+'</span>'
+      +'</div>';
+  }).join('');
+  el.querySelectorAll('input[type=color]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var entry=customLayers[parseInt(inp.dataset.layerI,10)];
+      setLineLayerColor(entry,inp.value);
+    });
+  });
 }
 function savedLines(){
   try{ return JSON.parse(localStorage.getItem(LS_LINES))||[]; }catch(e){ return []; }
@@ -1427,8 +1462,9 @@ function applyLineData(collections,persist){
   collections.forEach(function(col,i){
     var name=col.fileName||col.name||('Lag '+(i+1));
     var gj=reprojectIsn93IfNeeded(col.geojson||col);
-    addLineLayer(gj,name);
-    if(persist) saved.push({name:name,geojson:gj});
+    var color=col.color||nextLineColor();
+    addLineLayer(gj,name,color);
+    if(persist) saved.push({name:name,geojson:gj,color:color});
   });
   if(persist){
     try{ localStorage.setItem(LS_LINES,JSON.stringify(saved)); }
@@ -1438,7 +1474,7 @@ function applyLineData(collections,persist){
 function loadLineLayers(){
   var saved=savedLines();
   if(saved.length){
-    saved.forEach(function(s){ addLineLayer(s.geojson,s.name); });
+    saved.forEach(function(s){ addLineLayer(s.geojson,s.name,s.color); });
     return;
   }
   fetch('linuleid.zip').then(function(r){
