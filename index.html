@@ -244,6 +244,10 @@
   <div class="row">
     <button class="btn btn-ghost" id="gh-photos-sync">☁ Samstilla myndir</button>
   </div>
+  <div class="hint" style="margin-top:14px">Ef gögn í þessu tæki virðast ekki samræmast miðlægu skránni (t.d. gömul gildi sem birtast þótt þau séu ekki lengur á GitHub) getur hjálpað að hreinsa staðbundna geymslu og sækja hreint.</div>
+  <div class="row">
+    <button class="btn btn-ghost" id="gh-reset-cache">🗑 Hreinsa staðbundna geymslu</button>
+  </div>
 </dialog>
 
 <div class="toast" id="toast"></div>
@@ -1299,6 +1303,9 @@ function syncToGitHub(push,isRetry){
           }
           if(!r.ok) throw new Error('HTTP '+r.status+' við vistun');
           applyCsv(merged);
+          // Staðbundnu breytingarnar eru núna komnar inn í miðlægu skrána - hreinsum
+          // þær svo þær sitji ekki eftir og skrifi yfir nýrri gögn annarra í næstu sync.
+          edits={}; saveEdits();
           try{ localStorage.setItem(LS_LASTSYNC,String(Date.now())); }catch(e){}
           setGhStatus('Vistað á GitHub ✓ '+new Date().toLocaleTimeString('is-IS'));
           toast('Miðlæg CSV uppfærð á GitHub ✓');
@@ -1366,6 +1373,17 @@ document.getElementById('btn-sync').addEventListener('click',function(){
 document.getElementById('gh-photos-sync').addEventListener('click',function(){
   saveGhCfg();
   uploadPendingPhotos(false);
+});
+document.getElementById('gh-reset-cache').addEventListener('click',function(){
+  if(!confirm('Þetta hreinsar allar óskráðar breytingar í þessu tæki (sem hafa ekki þegar samstillst) og sækir hreina útgáfu af miðlægu skránni. Halda áfram?')) return;
+  edits={}; saveEdits();
+  try{ localStorage.removeItem(LS_CSV); }catch(e){}
+  document.getElementById('dlg-gh').close();
+  if(ghConfigured()){
+    runSync(false).then(function(){ toast('Staðbundin geymsla hreinsuð - sótt af GitHub ✓'); });
+  } else {
+    tryLoadBackupFile().then(function(){ toast('Staðbundin geymsla hreinsuð'); });
+  }
 });
 
 /* ---------- Kort ---------- */
