@@ -38,7 +38,7 @@
   header h1{font-size:15px;letter-spacing:.12em;text-transform:uppercase;margin:0;font-weight:700}
   header .sub{font-size:11px;color:var(--muted);letter-spacing:.06em}
 
-  main{flex:1;padding:16px;padding-bottom:96px}
+  main{flex:1;padding:16px}
   .view{display:none}
   .view.active{display:block}
   h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700}
@@ -77,7 +77,6 @@
   .btn-primary:active{background:var(--red-dim)}
   .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
   .btn-ghost:active{background:var(--surface)}
-  .btn-stack{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px;z-index:1200}
 
   .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
   .kv .k{color:var(--muted)}
@@ -136,8 +135,6 @@
     #view-form{order:1;flex:1;min-width:0;display:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}
     body.view-form-active #view-form{display:block}
     body.view-form-active #panel-map{display:none!important}
-    #f-close{display:inline-flex!important;align-items:center;justify-content:center}
-    .btn-stack{max-width:none;padding-left:24px;padding-right:24px}
   }
 </style>
 </head>
@@ -188,7 +185,7 @@
         <h2 style="margin:0" id="f-title">—</h2>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="badge" id="f-badge">—</span>
-          <button class="icon-btn" id="f-close" title="Loka" aria-label="Loka" style="display:none">✕</button>
+          <button class="icon-btn" id="f-close" title="Loka" aria-label="Loka">✕</button>
         </div>
       </div>
       <div id="f-meta"></div>
@@ -203,8 +200,6 @@
       <div class="hint" style="margin-top:8px">Allt vistast sjálfkrafa í tækinu um leið og skrifað er.</div>
     </section>
   </main>
-
-  <div class="btn-stack" id="footer-actions"></div>
 </div>
 
 <input type="file" id="csv-input" accept=".csv,text/csv" style="display:none">
@@ -217,6 +212,14 @@
   <input id="kks-input" list="kks-list" placeholder="t.d. BLA3" autocomplete="off">
   <datalist id="kks-list"></datalist>
   <div class="hint">Notað til að merkja skráða punkta og ljósmyndir sjálfkrafa.</div>
+  <h2 style="margin-top:22px">Gögn</h2>
+  <div class="row" style="margin-top:0">
+    <button class="btn btn-ghost" id="set-import">⬆ CSV inn</button>
+    <button class="btn btn-ghost" id="set-photos">⬇ Myndir</button>
+  </div>
+  <div class="row">
+    <button class="btn btn-primary" id="set-export">⬇ CSV út</button>
+  </div>
   <h2 style="margin-top:22px">GitHub-samstilling</h2>
   <label for="gh-repo">Repo (eigandi/nafn)</label>
   <input id="gh-repo" placeholder="t.d. efla-verk/jardkonnun2026" autocomplete="off">
@@ -734,24 +737,14 @@ function show(view){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   $('#view-'+view).classList.add('active');
   document.body.classList.toggle('view-form-active', view==='form');
-  renderFooter(view);
 }
 function backToList(){
   renderList(); updateProgress(); if(mapInited)renderMapMarkers(); show('list');
 }
-function renderFooter(view){
-  var f=$('#footer-actions');
-  if(view==='list' || isDesktop()){
-    f.innerHTML='<button class="btn btn-ghost" id="fa-import">⬆ CSV inn</button><button class="btn btn-ghost" id="fa-photos">⬇ Myndir</button><button class="btn btn-primary" id="fa-export">⬇ CSV út</button>';
-    $('#fa-import').onclick=function(){ $('#csv-input').click(); };
-    $('#fa-photos').onclick=exportPhotos;
-    $('#fa-export').onclick=exportCsv;
-  } else if(view==='form'){
-    f.innerHTML='<button class="btn btn-ghost" id="fa-back">← Listi</button>';
-    $('#fa-back').onclick=backToList;
-  }
-}
 $('#f-close').addEventListener('click', backToList);
+$('#set-import').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); $('#csv-input').click(); });
+$('#set-photos').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); exportPhotos(); });
+$('#set-export').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); exportCsv(); });
 
 /* ---------- Innflutningur / útflutningur ---------- */
 $('#csv-input').addEventListener('change', function(e){
@@ -1613,7 +1606,6 @@ if('geolocation' in navigator){
 /* ---------- Ræsing ---------- */
 loadKks();
 loadEdits();
-renderFooter('list');
 openDB().then(initialLoad);
 // Sækjum nýjustu miðlægu skrána af GitHub við ræsingu (ef stillt)
 if(ghConfigured()){
@@ -1626,7 +1618,6 @@ var desktopMq = window.matchMedia('(min-width:900px)');
 function onDesktopChange(){
   if(isDesktop() && !mapInited) initMap();
   if(mapInited) setTimeout(function(){ map.invalidateSize(); },60);
-  renderFooter(document.getElementById('view-form').classList.contains('active') ? 'form' : 'list');
 }
 if(desktopMq.addEventListener) desktopMq.addEventListener('change', onDesktopChange);
 else if(desktopMq.addListener) desktopMq.addListener(onDesktopChange);
