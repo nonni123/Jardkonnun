@@ -130,8 +130,9 @@
     .seg{display:none}
     #view-list{display:contents}
     #panel-list{display:block!important;order:2;flex:0 0 380px;max-height:calc(100vh - 100px);overflow-y:auto;padding-right:4px}
-    #panel-map{display:block!important;order:1;flex:1;min-width:0;position:sticky;top:20px}
-    #map{height:calc(100vh - 140px);min-height:480px}
+    #panel-map{display:flex!important;flex-direction:column;order:1;flex:1;min-width:0;position:sticky;top:20px;height:calc(100vh - 100px);overflow-y:auto}
+    #panel-map>*{flex-shrink:0}
+    #map{flex:1 1 auto;height:auto;min-height:240px}
     #view-form{order:1;flex:1;min-width:0;display:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}
     body.view-form-active #view-form{display:block}
     body.view-form-active #panel-map{display:none!important}
