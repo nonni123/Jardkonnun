@@ -1437,6 +1437,16 @@ function setLineLayerColor(entry,color){
     try{ localStorage.setItem(LS_LINES,JSON.stringify(saved)); }catch(e){}
   }
 }
+function removeLineLayer(entry){
+  map.removeLayer(entry.layer);
+  layersControl.removeLayer(entry.layer);
+  var i=customLayers.indexOf(entry);
+  if(i!==-1) customLayers.splice(i,1);
+  var saved=savedLines().filter(function(s){ return s.name!==entry.name; });
+  try{ localStorage.setItem(LS_LINES,JSON.stringify(saved)); }catch(e){}
+  renderLayerList();
+  toast('Lagi hent: '+entry.name);
+}
 function renderLayerList(){
   var el=$('#layer-list');
   if(!el) return;
@@ -1444,13 +1454,20 @@ function renderLayerList(){
   el.innerHTML = customLayers.map(function(entry,i){
     return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0">'
       +'<input type="color" data-layer-i="'+i+'" value="'+entry.color+'" style="width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;flex:0 0 auto">'
-      +'<span style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(entry.name)+'</span>'
+      +'<span style="font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(entry.name)+'</span>'
+      +'<button type="button" class="icon-btn" data-remove-i="'+i+'" title="Henda lagi" aria-label="Henda lagi" style="width:32px;height:32px;font-size:15px;flex:0 0 auto">✕</button>'
       +'</div>';
   }).join('');
   el.querySelectorAll('input[type=color]').forEach(function(inp){
     inp.addEventListener('input',function(){
       var entry=customLayers[parseInt(inp.dataset.layerI,10)];
       setLineLayerColor(entry,inp.value);
+    });
+  });
+  el.querySelectorAll('button[data-remove-i]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var entry=customLayers[parseInt(btn.dataset.removeI,10)];
+      if(entry) removeLineLayer(entry);
     });
   });
 }
