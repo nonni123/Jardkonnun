@@ -121,6 +121,23 @@
   .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:10px;font-size:14px;z-index:1500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
   .toast.show{opacity:1}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* ---------- Desktop: kort vinstra megin, listi hægra megin, bæði alltaf sýnileg ---------- */
+  @media (min-width:900px){
+    .app{max-width:none}
+    header{padding:14px 24px}
+    main{display:flex;gap:20px;padding:20px 24px 24px;align-items:flex-start}
+    .seg{display:none}
+    #view-list{display:contents}
+    #panel-list{display:block!important;order:2;flex:0 0 380px;max-height:calc(100vh - 100px);overflow-y:auto;padding-right:4px}
+    #panel-map{display:block!important;order:1;flex:1;min-width:0;position:sticky;top:20px}
+    #map{height:calc(100vh - 140px);min-height:480px}
+    #view-form{order:1;flex:1;min-width:0;display:none;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}
+    body.view-form-active #view-form{display:block}
+    body.view-form-active #panel-map{display:none!important}
+    #f-close{display:inline-flex!important;align-items:center;justify-content:center}
+    .btn-stack{max-width:none;padding-left:24px;padding-right:24px}
+  }
 </style>
 </head>
 <body>
@@ -168,7 +185,10 @@
     <section class="view" id="view-form">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <h2 style="margin:0" id="f-title">—</h2>
-        <span class="badge" id="f-badge">—</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge" id="f-badge">—</span>
+          <button class="icon-btn" id="f-close" title="Loka" aria-label="Loka" style="display:none">✕</button>
+        </div>
       </div>
       <div id="f-meta"></div>
       <div class="section">
@@ -708,23 +728,29 @@ $('#f-done').addEventListener('change', function(){
 });
 
 /* ---------- Sýnastjórn ---------- */
+function isDesktop(){ return window.matchMedia('(min-width:900px)').matches; }
 function show(view){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   $('#view-'+view).classList.add('active');
+  document.body.classList.toggle('view-form-active', view==='form');
   renderFooter(view);
+}
+function backToList(){
+  renderList(); updateProgress(); if(mapInited)renderMapMarkers(); show('list');
 }
 function renderFooter(view){
   var f=$('#footer-actions');
-  if(view==='list'){
+  if(view==='list' || isDesktop()){
     f.innerHTML='<button class="btn btn-ghost" id="fa-import">⬆ CSV inn</button><button class="btn btn-ghost" id="fa-photos">⬇ Myndir</button><button class="btn btn-primary" id="fa-export">⬇ CSV út</button>';
     $('#fa-import').onclick=function(){ $('#csv-input').click(); };
     $('#fa-photos').onclick=exportPhotos;
     $('#fa-export').onclick=exportCsv;
   } else if(view==='form'){
     f.innerHTML='<button class="btn btn-ghost" id="fa-back">← Listi</button>';
-    $('#fa-back').onclick=function(){ renderList(); updateProgress(); if(mapInited)renderMapMarkers(); show('list'); };
+    $('#fa-back').onclick=backToList;
   }
 }
+$('#f-close').addEventListener('click', backToList);
 
 /* ---------- Innflutningur / útflutningur ---------- */
 $('#csv-input').addEventListener('change', function(e){
@@ -1592,6 +1618,17 @@ openDB().then(initialLoad);
 if(ghConfigured()){
   setTimeout(function(){ runSync(false); },2000);
 }
+// Á desktop er kortið alltaf sýnilegt vinstra megin - frumstillum það án
+// þess að bíða eftir að notandi ýti á "Kort" (sem er hvort eð er falið þar).
+if(isDesktop()) initMap();
+var desktopMq = window.matchMedia('(min-width:900px)');
+function onDesktopChange(){
+  if(isDesktop() && !mapInited) initMap();
+  if(mapInited) setTimeout(function(){ map.invalidateSize(); },60);
+  renderFooter(document.getElementById('view-form').classList.contains('active') ? 'form' : 'list');
+}
+if(desktopMq.addEventListener) desktopMq.addEventListener('change', onDesktopChange);
+else if(desktopMq.addListener) desktopMq.addListener(onDesktopChange);
 </script>
 </body>
 </html>
