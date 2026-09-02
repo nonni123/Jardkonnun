@@ -1,0 +1,151 @@
+﻿fid;Nr.;Nafn;Gerð;NG;X;Y;Z;H;Lengd;Horn;Unnið af;Dagsetning;tími;Ljósmynd;ALmenn lýsing á Jarðvegsaðstæðum;Til sérstakrar athugunar;Stagfestugerð;Gæði mats (1:borað, 2:pjakkað, 3:metið á staðnum) (V-H-A-F);Dýpi á jarðvatn [m] (V-H-A-F);Þykkt á lífrænu lagi [m] (V-H-A-F);Dýpi á burðarhæft [m] (V-H-A-F);Dýpi á fast [m] (V-H-A-F);Lífrænt efni (V-H-A-F);Yfir burðarhæfu (V-H-A-F);Burðarhæft efni (V-H-A-F);Klöpp (V-H-A-F);Er Nægjanlegt pláss fyrir mastrið, undirstöður, stagfestur og annan búnað?;Eru aðstæður fullnægjandi (fen, skurður, lækjarfarvegur o.s.frv.)?;Er mastrið utan hættusvæðis vegna landsbrots, skriðufalla, snjóflóða o.s.frv.?;Er mastrið utan við tún eða aðra viðkvæma staði?;Er staðbundin snjósöfnun í mastursstæði ólíkleg?;Er hóflegur hliðarhalli í mastursstæði?;Er þörf á sérstökum ráðstöfunum í mastursstæði? Ef þörf, þá hver?;Eru aðstæður í mastursstæði betri ef mastri er hliðrað til?;Leiðir færsla á mastri til þess að færa þurfi næstu möstur?;Er góð aðkoma að mastursstæði;Er þörf á aðkomuslóð (ef ekki, þá hvers vegna?);Er þörf á slóð fyrir jarðvinnutæki?;Er þörf á reisingarplani fyrir krana?;Búið að teikna aðkomuslóð a mynd?;Uppfyllir mastursstæði kröfur reglugerða um fjarlægð frá vegum og öðrum mannvirkjum? (1: já, 2:nei);Mastursstæði er í lagi, ekki þörf á breytingu;Skráning lokið (x);Línuheiti/KKS;Er jarðvegsmat framkvæmt?
+1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+2;0;-;Tengiv.;0 Tv. BLA;461972.131;546421.181;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+3;1;-;FAJ;1 FAJ;461942.483;546472.358;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+4;2;-;FAJ;2 FAJ;461784.561;546567.332;;;;;BG;2026-09-01;18:44;HH3-Nr.-2_1.jpg, HH3-Nr.-2_2.jpg, HH3-Nr.-2_3.jpg, HH3-Nr.-2_4.jpg;"Jarðvegur lýtur vel út. Malar""hryggur"" með smá gróðri. ";"Rör í bakhafi. Þarf að komast að því hvað það er. 
+Framhægri leggur er töluvert neðar en rest af mastri. Skoða að færa til.";;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+5;3;-;BSJ;3 BSJ;461717.865;546844.159;;;;;BG;2026-09-01;18:38;HH3-Nr.-3_1.jpg, HH3-Nr.-3_2.jpg;Gróin mói.;Tré undir línum. ;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+6;4;-;SMHJ;4 SMHJ;461680.429;546999.54;;;;;BG;2026-09-01;18:37;HH3-Nr.-4_1.jpg, HH3-Nr.-4_2.jpg;Töluverður hliðarhalli. En annars fínt mastrarstæði ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+7;5;5-B;BSJ;5 BSJ;461495.183;547269.472;;;;;BG;2026-09-01;18:35;HH3-5-B_1.jpg, HH3-5-B_2.jpg;Melur. Þýft. ;Búið að gróðursetja 4-5 ára tré;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+8;6;6-B;BSJE;6 BSJE;461281.827;547580.363;;;;;BG;2026-09-01;18:25;HH3-6-B_1.jpg, HH3-6-B_2.jpg;Gott mastrastæði. Þýfður melur stutt í möl sem maður sér í gljúfrinu. Stög góð. Gott mastrastæði.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+9;7;7-B;BS;7 BS;461068.006;547923.919;;;;;BG;2026-09-01;11:51;HH3-7-B_1.jpg, HH3-7-B_2.jpg, HH3-7-B_3.jpg, HH3-7-B_4.jpg, HH3-7-B_5.jpg;Frekar slétt mastrastæði. Mýrar jarðvegur. Auðvelt að færa fram og til baka. Ræsi rétt hjá mastrastæði sem bendir til bleytu;Ef það væri vætutíð væri mjög blautt. Imelur einhverja 50 m gramar;;2;;50H 70V;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;Já
+10;8;7A-B;BS;8 BS;460889.969;548209.981;;;;;BG;2026-09-01;12:28;HH3-7A-B_1.jpg, HH3-7A-B_2.jpg, HH3-7A-B_3.jpg, HH3-7A-B_4.jpg, HH3-7A-B_5.jpg, HH3-7A-B_6.jpg;"Mjög blautur mýrarjarðvegur. Mjög blautt. Pjakkur rekinn ítrekað í botn niður mjög auðveldlega. 
+
+Erfitt að sjá hvað nokkrir metrar fram og aftur skili.";Pjakkur rekin niður töluvert vinstra megin við línusþ og komið í möl í fullri dýpt. Ekki sönnun um neitt. Bleyta I slóð.;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+11;9;7B-B;BS;9 BS;460706.198;548505.255;;;;;BG;2026-09-01;12:45;HH3-7B-B_1.jpg, HH3-7B-B_2.jpg, HH3-7B-B_3.jpg, HH3-7B-B_4.jpg, HH3-7B-B_5.jpg, HH3-7B-B_6.jpg;Blaut mýri. Þýft og lyng á stöku stað. Erum að nálgast mel. Skömminni skárra en mastrið á undan;;;2V 2H;Við yfirborð;Fullur pjakkur niður;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;Já
+12;10;8-B;BS;10 BS;460519.147;548805.799;;;;;BG ;2026-09-01;12:58;HH3-8-B_1.jpg, HH3-8-B_2.jpg, HH3-8-B_3.jpg, HH3-8-B_4.jpg, HH3-8-B_5.jpg, HH3-8-B_6.jpg;Þýfin melur. Þurrt. Pjakkur rekinn í einhverskonar jökulruðning/þurra mold. Gott mastrastæði.;;;2H 2V;;0.35H 0.8V;;;;Mögulegur jökulruðningur. Heurist ekki í möl þegar pjakkur er rekinn niður. ;;;;;;;;;;;;;;;;;;;Já;HH3;Já
+13;11;9-B;BS;11 BS;460343.592;549087.871;;;;;BG;2026-09-01;13:18;HH3-9-B_1.jpg, HH3-9-B_2.jpg, HH3-9-B_3.jpg, HH3-9-B_4.jpg, HH3-9-B_5.jpg, HH3-9-B_6.jpg;Þýfin melur í smá hliðarhalli. Sendin jarðvegur en þó smá möl undir lífrænu. Gott mastrastæði.;;;2H 2V;;0.5H, 0.5V;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;Já
+14;12;10-B;BS;12 BS;460188.455;549337.137;;;;;Bg;2026-09-01;13:31;HH3-10-B_1.jpg, HH3-10-B_2.jpg, HH3-10-B_3.jpg, HH3-10-B_4.jpg, HH3-10-B_5.jpg, HH3-10-B_6.jpg, HH3-10-B_7.jpg, HH3-10-B_8.jpg, HH3-10-B_9.jpg;Þýfin mói í hliðarhalla. Svipað og í mastri á undan. Gott mastrastæði og þurrt.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+15;13;11-B;BS;13 BS;460047.284;549563.964;;;;;BG ;2026-09-01;18:07;HH3-11-B_1.jpg, HH3-11-B_2.jpg, HH3-11-B_3.jpg;Þurrt mastrastæði. Þýft. Gott mastrastæði. ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+16;14;12-B;BS;14 BS;459884.956;549824.785;;;;;BG;2026-09-01;17:57;HH3-12-B_1.jpg, HH3-12-B_2.jpg, HH3-12-B_3.jpg, HH3-12-B_4.jpg, HH3-12-B_5.jpg, HH3-12-B_6.jpg;"V: 1.1 Blautt lífrænt. 
+H: 0.8 blautt lífrænt. 
+
+Stoppar bæði á möl. 
+
+Blautt mastrastæði í mýri. Ekkert sundlaug en blautt. Stórþýft. 
+
+Bakstög lenda í svipuðu. Framstög líka.";"Skoða drónamyndir hvort sniðugt væri að færa.
+
+Má keyrs í slóðir. ";;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+17;15;13-B;BS;15 BS;459710.586;550104.954;;;;;;;;HH3-13-B_1.jpg, HH3-13-B_2.jpg, HH3-13-B_3.jpg;"V: 0.8 blautt lífrænt á malarlag. 
+H: 1 blautt lífrænt a malaria.
+
+Mastrastæðið er þurrt en rétt við mýri sem útskýrir blauta mold. Stórþýft. Fínt 
+mastrastæði. ";;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+18;16;14-B;BS;16 BS;459552.452;550359.034;;;;;BG;2026-09-01;17:40;HH3-14-B_1.jpg, HH3-14-B_2.jpg;Mjög þýfður mói. Þurrt. Gott mastrastæði.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+19;17;15-B;SMH;17 SMH;459385.205;550627.759;;;;;BG;2026-09-01;13:35;;Þýfin melur. 0.5 af lífrænu ofan á möl eða klöpp í H og 1.1 í V á möl. Þurrt og almennt gott mastrastæði.  Ekkert mál að hnika til ef þarf í 10-15m. Vægur hliðarhalli. Slóðin er þurr og góður. Rennur eftir mel.;Myndir eru við mastur 19. ;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+20;18;16-B;BS;18 BS;459291.791;550882.342;;;;;BG;2026-09-01;17:34;HH3-16-B_1.jpg, HH3-16-B_2.jpg, HH3-16-B_3.jpg;Þýfur mói. Þurrt. Gott mastrastæði.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+21;19;17-B;BS;19 BS;459198.484;551136.634;;;;;BG;2026-09-01;17:30;HH3-17-B_1.jpg, HH3-17-B_2.jpg, HH3-17-B_3.jpg, HH3-17-B_4.jpg, HH3-17-B_5.jpg, HH3-17-B_6.jpg, HH3-17-B_7.jpg, HH3-17-B_8.jpg, HH3-17-B_9.jpg;Þýfin melur. Þurrt og almennt gott mastrastæði.  Ekkert mál ;Færa myndir af hornmastri yfir I mastur 17.;;2H;;0.5H ;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;Nei
+22;20;18-B;BS;20 BS;459090.888;551429.867;;;;;BG ;2026-09-01;17:24;HH3-18-B_1.jpg, HH3-18-B_2.jpg, HH3-18-B_3.jpg;Þýft mólyng. Gott og þurrt mastrastæði. ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+23;21;19-B;BS;21 BS;458985.145;551718.05;;;;;BG;2026-09-01;17:19;HH3-19-B_1.jpg;Gott mastrastæði. Er á mel og kannski smá hliðarhalli í leggjum.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+24;22;20-B;SMH;22 SMH;458899.506;551951.443;;;;;BG;2026-09-01;14:02;HH3-20-B_1.jpg, HH3-20-B_2.jpg, HH3-20-B_3.jpg, HH3-20-B_4.jpg, HH3-20-B_5.jpg, HH3-20-B_6.jpg, HH3-20-B_7.jpg;V 0,5 af lífrænu og stopp í 0.9 í þéttum malarjarðvegi. Sama í H. Þurrt og gott mastrastæði. Þýfður melur. Hægt að færa ef þarf. ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+25;23;21-B;BS;23 BS;458836.771;552269.718;;;;;BG;2026-09-01;17:13;HH3-21-B_1.jpg, HH3-21-B_2.jpg, HH3-21-B_3.jpg;Gott mastrastæði. Frekar mói en melur. Þýft og þurrt.  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+26;24;22-B;BS;24 BS;458773.547;552590.476;;;;;Bg;2026-09-01;17:09;HH3-22-B_1.jpg;Þÿfður melur. Þurrt.  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+27;25;23-B;BS;25 BS;458725.831;552832.559;;;;;Bg;2026-09-01;17:08;HH3-23-B_1.jpg, HH3-23-B_2.jpg;"V: 0.3 lífrænt á þéttan mel. 
+
+Gott mastrastæði. Hægt að hreyfa I allar áttir.
+
+Stög lenda bara í svipuðu. ";;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+28;26;24-B;BS;26 BS;458659.438;553169.397;;;;;;;;HH3-24-B_1.jpg, HH3-24-B_2.jpg, HH3-24-B_3.jpg, HH3-24-B_4.jpg, HH3-24-B_5.jpg;V í slóð og hægri í þýftum móa;Færa slóð;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+29;27;25-B;BS;27 BS;458593.994;553501.417;;;;;BG;2026-09-01;16:45;HH3-25-B_1.jpg, HH3-25-B_2.jpg, HH3-25-B_3.jpg, HH3-25-B_4.jpg, HH3-25-B_5.jpg;"V: 0.7m lífrænt. H: 1.1m lífrænt 
+
+Vinstri leggur er á þurrum þýftum mel. Hægri leggur lendir í meiri mýri þar sem landið hallar smá niður. Ekkert rennandi en rakt. Framstag lendir líklega á þurru en aftirstög í smá mýri.";Þarf að keyra í slóðir á þessu svæði. ;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+30;28;26-B;BS;28 BS;458537.981;553785.589;;;;;BG;2026-09-01;16:39;HH3-26-B_1.jpg, HH3-26-B_2.jpg, HH3-26-B_3.jpg, HH3-26-B_4.jpg;"Virðist gott mastrastæði. Stórþýft með stóru grjóti í ""pyttum"". Þurrt við skoðun en gæti verið einhver vatnssöfnun. Hægt að færa í allar áttir. ";;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+31;29;27-B;BS;29 BS;458490.58;554026.072;;;;;BG;2026-09-01;16:29;HH3-27-B_1.jpg, HH3-27-B_2.jpg, HH3-27-B_3.jpg, HH3-27-B_4.jpg, HH3-27-B_5.jpg, HH3-27-B_6.jpg, HH3-27-B_7.jpg, HH3-27-B_8.jpg;"V: 0.5 á lífrænt. Jökulruðningur 
+
+H:0.5 af lífrænu. 0.9 lendir pjakkur á fyrirstöðu. 
+
+Gott mastrastæði en þó í smá lægt sem gæti verið blaut í væri. Þýft og lífrænt ";Mögulega gera þetta að hornmastri ef við viljum breyta mastri 31 og fara vestur fyrir hól.;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+32;30;28-B;BS;30 BS;458437.786;554293.916;;;;;;;;HH3-28-B_1.jpg, HH3-28-B_2.jpg, HH3-28-B_3.jpg, HH3-28-B_4.jpg, HH3-28-B_5.jpg, HH3-28-B_6.jpg, HH3-28-B_7.jpg;Gott mastrastæði. Þurrt. Grýttur melur. ;Skoða hvernig þetta væri sem horn í hengi niður í 35 eða mastur 29 á undan. ;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+33;31;29-B;SMH;31 SMH;458390.122;554535.733;;;;;BG;2026-09-01;14:36;HH3-29-B_1.jpg, HH3-29-B_2.jpg, HH3-29-B_3.jpg, HH3-29-B_4.jpg, HH3-29-B_5.jpg, HH3-29-B_6.jpg, HH3-29-B_7.jpg, HH3-29-B_8.jpg, HH3-29-B_9.jpg, HH3-29-B_10.jpg, HH3-29-B_11.jpg, HH3-29-B_12.jpg, HH3-29-B_13.jpg;Vandræða mastrastæði. Klettur í Bakhafi sem vinstri leiðari þarf að hækka töluvert til að þvera. Bakstög lenda ekki á góðum stað. Væri betra að fara vestur fyrir hólinn. Þurr grýttur melur.;Þarf að færa mastur að mati BG;;;;;;;;;;;Nei;Nei;Já;Já;Nei;Já;Færa mastur;Já;Já;Já;Nei - fylgir gömlum línuslóða. ;Já;Já;Já;1;Nei;Já;HH3;
+34;32;30-B;BS;32 BS;458308.293;554709.768;;;;;BG;2026-09-01;16:02;HH3-30-B_1.jpg, HH3-30-B_2.jpg, HH3-30-B_3.jpg, HH3-30-B_4.jpg, HH3-30-B_5.jpg, HH3-30-B_6.jpg, HH3-30-B_7.jpg;Grýttur melur. Þurrt. Hægt að færa i allar áttir vegna masters 35.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+35;33;31-B;BS;33 BS;458184.14;554973.817;;;;;;;;HH3-31-B_1.jpg, HH3-31-B_2.jpg, HH3-31-B_3.jpg, HH3-31-B_4.jpg, HH3-31-B_5.jpg, HH3-31-B_6.jpg, HH3-31-B_7.jpg;Mjög gott mastrastæði. Kannski 0.1-0.2 lífrænt lag. Grýttur melur. Þurr. Hægt að færa vestur ef þarf vegna masturs 35. Gæti verið stutt á klöpp.;;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+36;34;31A-B;BS;34 BS;458049.055;555261.116;;;;;BG;2026-09-01;15:17;HH3-31A-B_1.jpg, HH3-31A-B_2.jpg, HH3-31A-B_3.jpg, HH3-31A-B_4.jpg, HH3-31A-B_5.jpg, HH3-31A-B_6.jpg, HH3-31A-B_7.jpg;"Gott mastrastæði. Hægt að hreyfa sig.
+Lífrænt, stórgrýti, þýft";;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+37;35;32-B;SMH;35 SMH;457917.268;555541.402;;;;;BG;2026-09-01;15:03;HH3-32-B_1.jpg, HH3-32-B_2.jpg, HH3-32-B_3.jpg, HH3-32-B_4.jpg, HH3-32-B_5.jpg, HH3-32-B_6.jpg, HH3-32-B_7.jpg, HH3-32-B_8.jpg, HH3-32-B_9.jpg, HH3-32-B_10.jpg;"Lítill skurður rétt við mastur. 
+
+H: 0.9 blautur lífræn jarðvegur á einhverskonar möl
+V: 0.7 af lífrænu á einhverskonar möl. 
+
+Raki í jarðvegsstæði.
+
+Pjakkur rekinn niður á kaf í bakstögum.";Mætti athuga að færa aðeins framar. Er þurrara í framhafi.;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+38;36;33-B;BS;36 BS;457896.934;555813.534;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+39;37;34-B;SMH;37 SMH;457860.473;556301.514;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+40;38;35-B;SMH;38 SMH;457829.637;556714.203;;;;;BG ;2026-09-01;20:15;HH3-35-B_1.jpg, HH3-35-B_2.jpg, HH3-35-B_3.jpg;Mjög blautt. Hálfgerð mýri. Blautt í stögum og undirstöðum. Ekkert besta svæðið. ;Skoða að færa nær hlíð.;;;;;;;;;;;Já;Nei;Já;Já;Nei;Já;Mögulega. Er svo blautt. ;Nei;Já;Já;Já nýtt land.;Já;Já;Nei;1;Nei;Já;HH3;
+41;39;36-B;BS;39 BS;457800.414;557105.304;;;;;BG;2026-09-01;19:59;HH3-36-B_1.jpg, HH3-36-B_2.jpg, HH3-36-B_3.jpg, HH3-36-B_4.jpg, HH3-36-B_5.jpg, HH3-36-B_6.jpg, HH3-36-B_7.jpg;"V: 1,0 lífrænt og 1.4 stoppar á möl. 
+H: 1.1 lífrænt og stoppar svo á möl.
+
+
+Mikill halli í línustefnu og þvert á. Mjög óhentugt mastrastæði. ";"Mynd 1 og 2 eru ofar í brekkunni. Mögulega má færa mastrið þangað. 
+
+Mikill halli í línustefnu og þvert á. Mjög óhentugt mastrastæði. ";;;;;;;;;;;Nei;Já;Já;Já;Já;Nei;Já þarf mikið að skera land til að komast í stæðið. Þyrfti mikið að skera land til að koma mastri fyrir. Mikið lífrænt.;Nei;Já;Nei;Já. Nýtt land;Já;Já;Nei;1;Nei;Já;HH3;
+42;40;37-B;BS;40 BS;457784.984;557311.807;;;;;BG;2026-09-01;19:43;HH3-37-B_1.jpg, HH3-37-B_2.jpg, HH3-37-B_3.jpg, HH3-37-B_4.jpg, HH3-37-B_5.jpg;"H: 0.9 lífrænt í þéttan malarjarðveg.
+V: 0.9 lífrænt í þéttan malarjarðveg
+
+Þýfður mói. Þurrt mastrastæði. Mold en stutt á möl miðað við jarðveg í kring. 
+
+Gott mastrastæði.";Spurning hvort hægt sé að færa 39 nær 42 og sleppa 40?;;;;;;;;;;;;;;;;;;;;;;;;;;;Já;HH3;
+43;41;38-B;BS;41 BS;457761.321;557628.504;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+44;42;39-B;BS;42 BS;457743.489;557867.159;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+45;43;40-B;BS;43 BS;457724.329;558123.574;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+46;44;40-B-C;BS;44 BS;457706.932;558356.405;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+47;45;41-B;FA;45 FA;457676.58;558762.622;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+48;46;41-B-C;BS;46 BS;457400.651;559033.134;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+49;47;42-B;BS;47 BS;457129.058;559299.396;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+50;48;43-B;BS;48 BS;456889.399;559534.351;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+51;49;45-B;BS;49 BS;456633.172;559785.548;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+52;50;46-B;BS;50 BS;456356.166;560057.117;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+53;51;46A-B;BS;51 BS;456115.306;560293.248;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+54;52;47-B;BS;52 BS;455863.829;560539.79;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+55;53;48-B;BS;53 BS;455587.694;560810.504;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+56;54;49-B;BS;54 BS;455326.768;561066.307;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+57;55;50-B;BS;55 BS;455030.296;561356.96;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+58;56;51-B;BS;56 BS;454766.548;561554.839;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+59;57;52-B;BS;57 BS;454556.836;561712.176;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+60;58;53-B;SMH;58 SMH;454292.894;561910.2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+61;59;54-B;BS;59 BS;454046.163;561982.668;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+62;60;55-B;BS;60 BS;453808.283;562052.537;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+63;60_1;56-B;BSH;60_1 BSH;453506.246;562141.25;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+64;61;57-B;BS;61 BS;453240.417;562235.511;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+65;62;58-B;SMH;62 SMH;452969.049;562331.736;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+66;63;59-C;BS;63 BS;452621.453;562485.263;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+67;64;60-C;BS;64 BS;452281.577;562635.379;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+68;65;61-C;SMH;65 SMH;451937.147;562787.508;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+69;66;62-C;BS;66 BS;451699.645;563005.785;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+70;67;63-C;BS;67 BS;451416.465;563266.043;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+71;68;64-C;BS;68 BS;451135.988;563523.818;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+72;69;65-C;BS;69 BS;450881.581;563757.631;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+73;70;66-C;BSH;70 BSH;450545.184;564066.799;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+74;71;67-C;BS;71 BS;450271.797;564250.801;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+75;72;68-C;BS;72 BS;450020.637;564419.844;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+76;73;69-C;BS;73 BS;449766.539;564590.864;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+77;74;70-C;SMH;74 SMH;449620.157;564689.386;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+78;75;71-C;BS;75 BS;449504.712;564864.653;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+79;76;72-C;BS;76 BS;449371.688;565066.609;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+80;77;73-C;BS;77 BS;449207.452;565315.949;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+81;78;74-C;BS;78 BS;449040.923;565568.772;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+82;79;75-C;BS;79 BS;448862.511;565839.634;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+83;80;76-C;BSH;80 BSH;448681.818;566113.961;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+84;81;76-B;BS;81 BS;448484.095;566496.076;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+85;82;77-B;BS;82 BS;448370.812;566715.003;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+86;83;78-B;BS;83 BS;448273.206;566903.634;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+87;84;79-B;SMH;84 SMH;448186.146;567071.884;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+88;85;80-B;BS;85 BS;447965.049;567305.62;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+89;86;81-B;SMH;86 SMH;447759.663;567522.746;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+90;87;82-B;BS;87 BS;447530.555;567764.951;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+91;88;83-B;BS;88 BS;447285.463;568024.054;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+92;89;83A-B;BSH;89 BSH;447036.625;568287.117;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+93;90;83B-B;BS;90 BS;446747.56;568521.591;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+94;91;84-B;BSH;91 BSH;446456.706;568757.515;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+95;92;85-B;BS;92 BS;446198.714;569032.371;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+96;93;86-B;BS;93 BS;445965.133;569281.22;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+97;94;87-B;BS;94 BS;445754.411;569505.716;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+98;95;88-B;BS;95 BS;445544.228;569729.637;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+99;96;89-B;BS;96 BS;445306.295;569983.123;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+100;97;90-B;FAJ;97 FAJ;445066.74;570238.337;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+101;98;91-B;BSJ;98 BSJ;444761.902;570161.675;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+102;99;92-B;BSHJ;99 BSHJ;444409.721;570073.107;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+103;100;93-B;SMHJ;100 SMHJ;444107.331;569986.344;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+104;101;94-B;FAJ;101 FAJ;443825.541;569981.53;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+105;102;95-B;Tv.;102 Tv. Lax;443765.482;569970.063;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
