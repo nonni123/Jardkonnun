@@ -203,7 +203,7 @@
 </div>
 
 <input type="file" id="csv-input" accept=".csv,text/csv" style="display:none">
-<input type="file" id="photo-input" accept="image/*" capture="environment" multiple style="display:none">
+<input type="file" id="photo-input" accept="image/*" multiple style="display:none">
 <input type="file" id="layer-input" accept=".zip,.geojson,.json,application/zip,application/json" style="display:none">
 
 <dialog id="dlg-gh">
@@ -218,6 +218,11 @@
     <option value="orig">Upprunaleg stærð</option>
   </select>
   <div class="hint">Upprunaleg stærð gefur skarpari myndir en stærri skrár - hægara upphal á lélegu sambandi úti á vettvangi.</div>
+  <div class="done-row" style="margin-top:14px">
+    <input type="checkbox" id="save-original">
+    <span>Bjóða að vista frumeintak í fullri upplausn á tækinu</span>
+  </div>
+  <div class="hint">Eftir myndatöku birtist val um að vista upprunalegu myndina beint í myndasafn símans, til viðbótar við þá sem fer í skráninguna.</div>
   <h2 style="margin-top:22px">Gögn</h2>
   <div class="row" style="margin-top:0">
     <button class="btn btn-ghost" id="set-import">⬆ CSV inn</button>
@@ -276,6 +281,8 @@ var LS_EDITS = 'jk2026_edits';
 var LS_KKS = 'jk2026_kks';
 var LS_PHOTO_QUALITY = 'jk2026_photoq';
 function getPhotoQuality(){ try{ return localStorage.getItem(LS_PHOTO_QUALITY)||'std'; }catch(e){ return 'std'; } }
+var LS_SAVE_ORIGINAL = 'jk2026_saveorig';
+function getSaveOriginal(){ try{ return localStorage.getItem(LS_SAVE_ORIGINAL)==='1'; }catch(e){ return false; } }
 var LABEL_MIN_ZOOM = 13;
 
 /* Fyrstu dálkarnir (0..HORN_IDX) eru forútfylltir og aðeins til sýnis */
@@ -1040,6 +1047,16 @@ function downloadRemotePhoto(p,name,el){
       renderPhotoBlock(p);
     });
 }
+/* Býður að vista frummyndirnar (fyrir þjöppun) beint í myndasafn tækisins
+   gegnum deilingar-viðmót vafrans, ef notandi hefur kveikt á því í stillingum. */
+function offerSaveOriginal(files){
+  if(!getSaveOriginal()) return;
+  if(!(navigator.share && navigator.canShare && navigator.canShare({files:files}))){
+    toast('Þetta tæki styður ekki að vista mynd beint í myndasafn frá vafra.');
+    return;
+  }
+  navigator.share({files:files, title:'Jarðkönnun - upprunalegar myndir'}).catch(function(){});
+}
 $('#photo-input').addEventListener('change', function(e){
   var files=Array.prototype.slice.call(e.target.files);
   e.target.value='';
@@ -1047,6 +1064,7 @@ $('#photo-input').addEventListener('change', function(e){
   if(!db){ toast('Myndageymsla ekki tiltæk'); return; }
   var p=points.filter(function(x){return x.fid===currentFid;})[0];
   if(!p) return;
+  offerSaveOriginal(files);
   ensureKksStamped(p.fid); saveEdits();
   photosByFid(p.fid).then(function(existing){
     var seq=nextSeq(existing);
@@ -1334,6 +1352,7 @@ function openSettingsDialog(){
   var cfg=ghCfg()||{};
   populateKksField();
   $('#photo-quality').value=getPhotoQuality();
+  $('#save-original').checked=getSaveOriginal();
   $('#gh-repo').value=cfg.repo||'';
   $('#gh-path').value=cfg.path||'Jardkonnun2026_central.csv';
   $('#gh-branch').value=cfg.branch||'main';
@@ -1350,6 +1369,9 @@ $('#kks-input').addEventListener('change',function(){
 });
 $('#photo-quality').addEventListener('change',function(){
   try{ localStorage.setItem(LS_PHOTO_QUALITY, $('#photo-quality').value); }catch(e){}
+});
+$('#save-original').addEventListener('change',function(){
+  try{ localStorage.setItem(LS_SAVE_ORIGINAL, $('#save-original').checked?'1':'0'); }catch(e){}
 });
 document.getElementById('btn-settings').addEventListener('click', openSettingsDialog);
 document.getElementById('gh-close').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); });
