@@ -212,6 +212,12 @@
   <input id="kks-input" list="kks-list" placeholder="t.d. BLA3" autocomplete="off">
   <datalist id="kks-list"></datalist>
   <div class="hint">Notað til að merkja skráða punkta og ljósmyndir sjálfkrafa.</div>
+  <label for="photo-quality">Myndgæði</label>
+  <select id="photo-quality">
+    <option value="std">2048px (mælt með)</option>
+    <option value="orig">Upprunaleg stærð</option>
+  </select>
+  <div class="hint">Upprunaleg stærð gefur skarpari myndir en stærri skrár - hægara upphal á lélegu sambandi úti á vettvangi.</div>
   <h2 style="margin-top:22px">Gögn</h2>
   <div class="row" style="margin-top:0">
     <button class="btn btn-ghost" id="set-import">⬆ CSV inn</button>
@@ -268,6 +274,8 @@ var CSV_FILE = 'Jardkonnun2026_central.csv';
 var LS_CSV = 'jk2026_csv';
 var LS_EDITS = 'jk2026_edits';
 var LS_KKS = 'jk2026_kks';
+var LS_PHOTO_QUALITY = 'jk2026_photoq';
+function getPhotoQuality(){ try{ return localStorage.getItem(LS_PHOTO_QUALITY)||'std'; }catch(e){ return 'std'; } }
 var LABEL_MIN_ZOOM = 13;
 
 /* Fyrstu dálkarnir (0..HORN_IDX) eru forútfylltir og aðeins til sýnis */
@@ -896,7 +904,9 @@ function processPhotoFile(file,p,seq){
     var url=URL.createObjectURL(file);
     var img=new Image();
     img.onload=function(){
-      var MAX=1600;
+      var q=getPhotoQuality();
+      var MAX=q==='orig'?Infinity:2048;
+      var jpegQ=q==='orig'?0.95:0.92;
       var w=img.naturalWidth,h=img.naturalHeight;
       var sc=Math.min(1,MAX/Math.max(w,h));
       var c=document.createElement('canvas');
@@ -918,7 +928,7 @@ function processPhotoFile(file,p,seq){
           res({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
                 fid:p.fid, name:name, lat:lat, lon:lon, createdAt:Date.now(), uploaded:false, blob:final });
         }).catch(rej);
-      },'image/jpeg',0.85);
+      },'image/jpeg',jpegQ);
     };
     img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('Myndalestur mistókst')); };
     img.src=url;
@@ -1323,6 +1333,7 @@ function syncToGitHub(push,isRetry){
 function openSettingsDialog(){
   var cfg=ghCfg()||{};
   populateKksField();
+  $('#photo-quality').value=getPhotoQuality();
   $('#gh-repo').value=cfg.repo||'';
   $('#gh-path').value=cfg.path||'Jardkonnun2026_central.csv';
   $('#gh-branch').value=cfg.branch||'main';
@@ -1336,6 +1347,9 @@ function openSettingsDialog(){
 $('#hdr-sub').addEventListener('click', openSettingsDialog);
 $('#kks-input').addEventListener('change',function(){
   saveKks($('#kks-input').value);
+});
+$('#photo-quality').addEventListener('change',function(){
+  try{ localStorage.setItem(LS_PHOTO_QUALITY, $('#photo-quality').value); }catch(e){}
 });
 document.getElementById('btn-settings').addEventListener('click', openSettingsDialog);
 document.getElementById('gh-close').addEventListener('click',function(){ document.getElementById('dlg-gh').close(); });
