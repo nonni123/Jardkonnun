@@ -176,6 +176,11 @@
         <button class="btn btn-ghost" id="btn-layers" style="margin-top:10px">⬆ Bæta við lagi (shapefile-zip / GeoJSON)</button>
         <div class="hint" style="margin-top:6px">Zip þarf að innihalda .shp og .dbf (helst líka .prj). Lagið vistast í tækinu og hægt er að kveikja/slökkva á því í lagavalinu á kortinu.</div>
         <div id="layer-list"></div>
+        <button class="btn btn-ghost" id="btn-track-toggle" style="margin-top:10px">▶ Byrja að rekja GPS-slóð</button>
+        <div class="hint" id="track-hint" style="margin-top:6px">Skráir slóðina þína á meðan gengið/ekið er línuna og vistar sem shapefile (.zip) þegar hætt er.</div>
+        <div class="row" id="track-clear-row" style="display:none;margin-top:0">
+          <button class="btn btn-ghost" id="btn-track-clear">🗑 Hreinsa slóð af korti</button>
+        </div>
       </div>
     </section>
 
@@ -266,6 +271,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.2/dist/proj4.js"></script>
 <script src="https://unpkg.com/shpjs@4.0.4/dist/shp.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 "use strict";
 /* ============================================================
@@ -1460,6 +1466,144 @@ var LS_LINES='jk2026_lines';
 var LINE_PALETTE=['#000000','#1a73e8','#e64a19','#43a047','#8e24aa','#fbc02d','#00838f','#c2185b'];
 var customLayers=[]; // { name, color, layer, geojson }
 function nextLineColor(){ return LINE_PALETTE[customLayers.length % LINE_PALETTE.length]; }
+
+/* ---------- GPS-slóð (rekja og vista sem shapefile) ---------- */
+var tracking=false, trackPoints=[], trackPolyline=null;
+var TRACK_MIN_DIST=4; // m - hunsar GPS-titring undir þessari fjarlægð
+function trackAddPoint(lat,lon){
+  var last=trackPoints[trackPoints.length-1];
+  if(last && haversine(last.lat,last.lon,lat,lon)<TRACK_MIN_DIST) return;
+  trackPoints.push({lat:lat,lon:lon,t:Date.now()});
+  if(!mapInited) return;
+  if(!trackPolyline){
+    trackPolyline=L.polyline(trackPoints.map(function(p){return [p.lat,p.lon];}),{pane:'pointsPane',color:'#1a73e8',weight:4,opacity:.9,interactive:false}).addTo(map);
+  } else {
+    trackPolyline.addLatLng([lat,lon]);
+  }
+}
+function startTracking(){
+  if(!userPos){ toast('Engin GPS-staðsetning fundin ennþá - bíddu aðeins og reyndu aftur.'); return; }
+  if(trackPolyline){ map.removeLayer(trackPolyline); trackPolyline=null; }
+  trackPoints=[];
+  tracking=true;
+  trackAddPoint(userPos.lat,userPos.lon);
+  $('#btn-track-toggle').textContent='⏹ Stöðva og vista slóð';
+  $('#track-clear-row').style.display='none';
+  toast('Byrjað að rekja GPS-slóð');
+}
+/* Skrifar .shp/.shx fyrir eina PolyLine-færslu (shape type 3), sbr. ESRI
+   Shapefile Technical Description. coords: [[lon,lat], ...] í WGS84. */
+function buildShpAndShx(coords){
+  var n=coords.length;
+  var xs=coords.map(function(c){return c[0];}), ys=coords.map(function(c){return c[1];});
+  var xmin=Math.min.apply(null,xs), xmax=Math.max.apply(null,xs);
+  var ymin=Math.min.apply(null,ys), ymax=Math.max.apply(null,ys);
+  var contentLen=4+32+4+4+4+16*n; // bytes: shapeType+box+numParts+numPoints+parts[1]+points[n]
+  var shpFileLen=100+8+contentLen;
+  var shpDv=new DataView(new ArrayBuffer(shpFileLen));
+  shpDv.setInt32(0,9994,false);
+  shpDv.setInt32(24,shpFileLen/2,false);
+  shpDv.setInt32(28,1000,true);
+  shpDv.setInt32(32,3,true);
+  shpDv.setFloat64(36,xmin,true); shpDv.setFloat64(44,ymin,true);
+  shpDv.setFloat64(52,xmax,true); shpDv.setFloat64(60,ymax,true);
+  var off=100;
+  shpDv.setInt32(off,1,false); off+=4;
+  shpDv.setInt32(off,contentLen/2,false); off+=4;
+  shpDv.setInt32(off,3,true); off+=4;
+  shpDv.setFloat64(off,xmin,true); off+=8; shpDv.setFloat64(off,ymin,true); off+=8;
+  shpDv.setFloat64(off,xmax,true); off+=8; shpDv.setFloat64(off,ymax,true); off+=8;
+  shpDv.setInt32(off,1,true); off+=4;
+  shpDv.setInt32(off,n,true); off+=4;
+  shpDv.setInt32(off,0,true); off+=4;
+  for(var i=0;i<n;i++){ shpDv.setFloat64(off,coords[i][0],true); off+=8; shpDv.setFloat64(off,coords[i][1],true); off+=8; }
+
+  var shxDv=new DataView(new ArrayBuffer(108));
+  shxDv.setInt32(0,9994,false);
+  shxDv.setInt32(24,54,false);
+  shxDv.setInt32(28,1000,true);
+  shxDv.setInt32(32,3,true);
+  shxDv.setFloat64(36,xmin,true); shxDv.setFloat64(44,ymin,true);
+  shxDv.setFloat64(52,xmax,true); shxDv.setFloat64(60,ymax,true);
+  shxDv.setInt32(100,50,false);
+  shxDv.setInt32(104,contentLen/2,false);
+
+  return { shp:shpDv.buffer, shx:shxDv.buffer };
+}
+/* Skrifar lágmarks dBase III (.dbf) skrá - eina færslu, ASCII-svið aðeins
+   svo staf-kóðun rugli ekki lengd/röðun. */
+function buildDbf(fields,record){
+  var headerSize=32+32*fields.length+1;
+  var recordSize=1+fields.reduce(function(s,f){return s+f.length;},0);
+  var buf=new ArrayBuffer(headerSize+recordSize+1);
+  var dv=new DataView(buf), u8=new Uint8Array(buf);
+  dv.setUint8(0,0x03);
+  var d=new Date();
+  dv.setUint8(1,d.getFullYear()-1900); dv.setUint8(2,d.getMonth()+1); dv.setUint8(3,d.getDate());
+  dv.setUint32(4,1,true);
+  dv.setUint16(8,headerSize,true);
+  dv.setUint16(10,recordSize,true);
+  var off=32;
+  fields.forEach(function(f){
+    for(var i=0;i<11;i++) u8[off+i]= i<f.name.length ? f.name.charCodeAt(i) : 0;
+    dv.setUint8(off+11,f.type.charCodeAt(0));
+    dv.setUint8(off+16,f.length);
+    dv.setUint8(off+17,f.decimals||0);
+    off+=32;
+  });
+  u8[off]=0x0D; off+=1;
+  u8[off]=0x20; off+=1; // ekki eytt
+  fields.forEach(function(f){
+    var val=String(record[f.name]==null?'':record[f.name]).slice(0,f.length);
+    var padded= f.type==='N' ? (' '.repeat(f.length-val.length)+val) : (val+' '.repeat(f.length-val.length));
+    for(var j=0;j<f.length;j++) u8[off+j]=padded.charCodeAt(j);
+    off+=f.length;
+  });
+  u8[off]=0x1A; // EOF
+  return buf;
+}
+function saveTrackAsShapefile(){
+  var coords=trackPoints.map(function(p){ return [p.lon,p.lat]; });
+  var shpshx=buildShpAndShx(coords);
+  var dbf=buildDbf(
+    [{name:'NAFN',type:'C',length:20},{name:'BYRJUN',type:'C',length:24},{name:'ENDIR',type:'C',length:24},{name:'PUNKTAR',type:'N',length:8,decimals:0}],
+    { NAFN:'GPS track', BYRJUN:new Date(trackPoints[0].t).toISOString(), ENDIR:new Date(trackPoints[trackPoints.length-1].t).toISOString(), PUNKTAR:trackPoints.length }
+  );
+  var prj='GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]';
+  var zip=new JSZip();
+  zip.file('gps-slod.shp',shpshx.shp);
+  zip.file('gps-slod.shx',shpshx.shx);
+  zip.file('gps-slod.dbf',dbf);
+  zip.file('gps-slod.prj',prj);
+  zip.generateAsync({type:'blob'}).then(function(blob){
+    var d=new Date();
+    var name='GPS-slod_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'.zip';
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=name; a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    toast('Slóð vistuð sem shapefile ('+trackPoints.length+' punktar)');
+  }).catch(function(e){
+    console.error('Shapefile-útflutningur slóðar:',e);
+    toast('Mistókst að vista slóð sem shapefile');
+  });
+}
+function stopTracking(){
+  tracking=false;
+  $('#btn-track-toggle').textContent='▶ Byrja að rekja GPS-slóð';
+  if(trackPoints.length<2){
+    toast('Of fá punktar skráðust til að vista slóð.');
+    return;
+  }
+  saveTrackAsShapefile();
+  $('#track-clear-row').style.display= trackPolyline ? 'flex' : 'none';
+}
+function clearTrack(){
+  if(trackPolyline){ map.removeLayer(trackPolyline); trackPolyline=null; }
+  trackPoints=[];
+  $('#track-clear-row').style.display='none';
+}
+$('#btn-track-toggle').addEventListener('click',function(){ tracking?stopTracking():startTracking(); });
+$('#btn-track-clear').addEventListener('click',clearTrack);
 function reprojectIsn93IfNeeded(geojson){
   var needs=false;
   function walk(coords,fn){
@@ -1642,6 +1786,7 @@ function updateMapLabels(){
 if('geolocation' in navigator){
   navigator.geolocation.watchPosition(function(pos){
     userPos={lat:pos.coords.latitude,lon:pos.coords.longitude,alt:pos.coords.altitude};
+    if(tracking) trackAddPoint(userPos.lat,userPos.lon);
     if(mapInited){
       if(!userMarker){
         userMarker=L.circleMarker([userPos.lat,userPos.lon],{radius:9,color:'#fff',weight:3,fillColor:'#1a73e8',fillOpacity:1}).addTo(map);
