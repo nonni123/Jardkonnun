@@ -1144,7 +1144,10 @@ function b64ToText(b64){
   return new TextDecoder('utf-8').decode(u8);
 }
 
-/* ---------- Cloudinary: myndir (nýtt - kemur í stað upphals á GitHub) ---------- */
+/* ---------- Cloudinary: myndir (nýtt - kemur í stað upphals á GitHub) ----------
+   resource_type "raw" í stað "image": Cloudinary vinnur þá ekkert úr skránni
+   (enga sjálfvirka bestun/format-breytingu), svo GPS-EXIF sem er þegar skrifað
+   inn í myndina (sjá buildExifSegment) helst óskert alla leið til notandans. */
 var CLOUDINARY_CLOUD_NAME='lthr3qec';
 var CLOUDINARY_UPLOAD_PRESET='jardkonnun';
 function uploadOnePhotoCloudinary(ph){
@@ -1152,7 +1155,7 @@ function uploadOnePhotoCloudinary(ph){
   fd.append('file',ph.blob,ph.name);
   fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
   fd.append('public_id',ph.name.replace(/\.[^.]+$/,''));
-  return fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/image/upload',{method:'POST',body:fd})
+  return fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/raw/upload',{method:'POST',body:fd})
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(data){ return data.secure_url; });
 }
