@@ -681,7 +681,7 @@ function openForm(fid){
     if(f.type==='photos'){
       html+='<label>'+esc(f.name)+'</label>'
         +'<div class="photos" id="photo-block"></div>'
-        +'<div class="hint">Myndir fá heiti línu/KKS + punktsins og hlaupandi númer, GPS-hnit skrifast í myndina og nöfnin í CSV-dálkinn. Þær hlaðast sjálfkrafa upp á GitHub með næstu samstillingu.</div>';
+        +'<div class="hint">Myndir fá heiti línu/KKS + punktsins og hlaupandi númer, GPS-hnit skrifast í myndina. Þær hlaðast sjálfkrafa upp í myndaskýi og slóðin vistast í CSV-dálkinn.</div>';
       return;
     }
     html+=wrapOpen+'<label for="'+id+'">'+esc(f.name)+'</label>';
@@ -951,7 +951,7 @@ function refreshLjosmyndValue(p){
   if(ljosIdx===-1) return Promise.resolve();
   return photosByFid(p.fid).then(function(list){
     list.sort(function(a,b){ return a.createdAt-b.createdAt; });
-    setVal(p.fid, ljosIdx, list.map(function(ph){return ph.name;}).join(', '));
+    setVal(p.fid, ljosIdx, list.map(function(ph){return ph.cloudUrl||ph.name;}).join(', '));
   });
 }
 function renderPhotoBlock(p){
@@ -960,22 +960,24 @@ function renderPhotoBlock(p){
   if(!db){ block.innerHTML='<div class="hint">Myndageymsla ekki tiltæk í þessum vafra.</div>'; return; }
   photosByFid(p.fid).then(function(list){
     list.sort(function(a,b){ return a.createdAt-b.createdAt; });
-    renderPhotoTiles(p,list,{});
-    if(ghConfigured()){
-      listRemotePhotos(false).then(function(remoteMap){ renderPhotoTiles(p,list,remoteMap); });
-    }
+    renderPhotoTiles(p,list);
   });
 }
-function renderPhotoTiles(p,localList,remoteMap){
+/* "Ljósmynd"-dálkur punktsins segir nákvæmlega hvaða myndir eiga við hann -
+   ýmist beinar Cloudinary-slóðir (birtast strax, engin sókn þarf) eða eldri
+   ber skráarheiti frá því fyrir Cloudinary (sótt af GitHub við smell). */
+function renderPhotoTiles(p,localList){
   var block=document.getElementById('photo-block');
   // Ekki teikna yfir ef notandinn er farinn í annan punkt á meðan sótt var
   if(!block || currentFid!==p.fid) return;
   var localNames={};
   localList.forEach(function(ph){ localNames[ph.name]=true; });
-  var prefix=sanitizeName(displayName(p))+'_';
-  var remoteOnly=Object.keys(remoteMap).filter(function(name){
-    return name.indexOf(prefix)===0 && !localNames[name];
-  }).sort();
+  var csvVal = ljosIdx!==-1 ? (getVal(p,ljosIdx)||'') : '';
+  var refs = csvVal.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var remoteOnly = refs.filter(function(ref){
+    var name = /^https?:\/\//i.test(ref) ? ref.split('/').pop() : ref;
+    return !localNames[name] && !localNames[ref];
+  });
 
   var html=localList.map(function(ph){
     return '<div class="ph"><img src="'+URL.createObjectURL(ph.blob)+'" alt="'+esc(ph.name)+'">'
@@ -983,10 +985,13 @@ function renderPhotoTiles(p,localList,remoteMap){
       +'<div class="nm">'+esc(ph.name)+(ph.lat===null?' · án GPS':'')+(ph.uploaded?' · ☁︎':' · ekki uploadað')+'</div></div>';
   }).join('');
 
-  html+=remoteOnly.map(function(name){
-    return '<div class="ph ph-remote" data-remote-name="'+esc(name)+'">'
+  html+=remoteOnly.map(function(ref){
+    if(/^https?:\/\//i.test(ref)){
+      return '<div class="ph"><img src="'+esc(ref)+'" loading="lazy" alt="mynd"><div class="nm">☁ mynd</div></div>';
+    }
+    return '<div class="ph ph-remote" data-remote-name="'+esc(ref)+'">'
       +'<div class="ph-remote-placeholder">☁<small>Sækja mynd</small></div>'
-      +'<div class="nm">'+esc(name)+' · á GitHub</div></div>';
+      +'<div class="nm">'+esc(ref)+' · á GitHub</div></div>';
   }).join('');
 
   html+='<div class="add-photo" id="add-photo">📷<small>Taka mynd</small></div>';
@@ -1001,31 +1006,6 @@ function renderPhotoTiles(p,localList,remoteMap){
   });
   block.querySelectorAll('.ph-remote').forEach(function(el){
     el.onclick=function(){ downloadRemotePhoto(p,el.dataset.remoteName,el); };
-  });
-}
-/* Listi yfir myndir sem eru þegar til í myndamöppunni á GitHub - notað til
-   að sýna myndir sem ANNAÐ tæki hlóð upp, óháð staðbundinni geymslu. */
-var remotePhotoCache=null, remotePhotoCacheAt=0;
-function listRemotePhotos(force){
-  var cfg=ghCfg();
-  if(!ghConfigured()) return Promise.resolve({});
-  if(remotePhotoCache && !force && (Date.now()-remotePhotoCacheAt<60000)) return Promise.resolve(remotePhotoCache);
-  var headers={ 'Authorization':'Bearer '+cfg.token, 'Accept':'application/vnd.github+json' };
-  var dir=(cfg.photoDir||'myndir').replace(/^\/|\/$/g,'');
-  var url='https://api.github.com/repos/'+cfg.repo+'/contents/'
-    +dir.split('/').map(encodeURIComponent).join('/')+'?ref='+encodeURIComponent(cfg.branch||'main');
-  return fetch(url,{headers:headers}).then(function(r){
-    if(r.status===404) return [];
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }).then(function(list){
-    var map={};
-    (Array.isArray(list)?list:[]).forEach(function(item){ map[item.name]=item; });
-    remotePhotoCache=map; remotePhotoCacheAt=Date.now();
-    return map;
-  }).catch(function(err){
-    console.warn('Gat ekki sótt myndalista af GitHub:',err);
-    return remotePhotoCache||{};
   });
 }
 function downloadRemotePhoto(p,name,el){
@@ -1083,6 +1063,7 @@ $('#photo-input').addEventListener('change', function(e){
     .then(function(){
       renderPhotoBlock(p); refreshBadge();
       toast(userPos?'Mynd vistuð með GPS-hnitum ✓':'Mynd vistuð — ATH: án GPS-hnita (staðsetning óþekkt)');
+      uploadPendingPhotos(true);
     })
     .catch(function(err){ console.error('Myndvistun:',err); toast('Vistun myndar mistókst'); });
 });
@@ -1163,53 +1144,44 @@ function b64ToText(b64){
   return new TextDecoder('utf-8').decode(u8);
 }
 
-/* ---------- GitHub: myndir ---------- */
+/* ---------- Cloudinary: myndir (nýtt - kemur í stað upphals á GitHub) ---------- */
+var CLOUDINARY_CLOUD_NAME='lthr3qec';
+var CLOUDINARY_UPLOAD_PRESET='jardkonnun';
+function uploadOnePhotoCloudinary(ph){
+  var fd=new FormData();
+  fd.append('file',ph.blob,ph.name);
+  fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+  fd.append('public_id',ph.name.replace(/\.[^.]+$/,''));
+  return fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/image/upload',{method:'POST',body:fd})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data){ return data.secure_url; });
+}
+/* ---------- GitHub: myndir (eldri leið - notuð til að ná í myndir sem
+   þegar eru til á GitHub frá því fyrir Cloudinary-breytinguna) ---------- */
 function ghPhotoUrl(cfg,name){
   var dir=(cfg.photoDir||'myndir').replace(/^\/|\/$/g,'');
   return 'https://api.github.com/repos/'+cfg.repo+'/contents/'
     +dir.split('/').map(encodeURIComponent).join('/')+'/'+encodeURIComponent(name);
 }
-function uploadOnePhoto(cfg,headers,ph){
-  var url=ghPhotoUrl(cfg,ph.name), branch=cfg.branch||'main';
-  return ph.blob.arrayBuffer().then(function(buf){
-    var body={ message:'Ljósmynd: '+ph.name, content:u8ToB64(new Uint8Array(buf)), branch:branch };
-    return fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)}).then(function(r){
-      if(r.status===409||r.status===422){
-        // Skráin er þegar til á GitHub (t.d. endurupphlaðin mynd) - sækjum sha og reynum aftur
-        return fetch(url+'?ref='+encodeURIComponent(branch),{headers:headers})
-          .then(function(r2){ if(!r2.ok) throw new Error('HTTP '+r2.status); return r2.json(); })
-          .then(function(info){
-            body.sha=info.sha;
-            return fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
-          });
-      }
-      return r;
-    }).then(function(r){
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return true;
-    });
-  });
-}
 var photoSyncing=false;
 function uploadPendingPhotos(silent){
-  var cfg=ghCfg();
-  if(!ghConfigured()||photoSyncing||!db) return Promise.resolve();
+  if(photoSyncing||!db) return Promise.resolve();
   photoSyncing=true;
-  var headers={ 'Authorization':'Bearer '+cfg.token, 'Accept':'application/vnd.github+json' };
   return allPhotos().then(function(list){
     var pending=list.filter(function(ph){ return !ph.uploaded; });
     if(!pending.length){
       photoSyncing=false;
-      if(!silent) setGhStatus('Allar myndir eru þegar á GitHub.');
+      if(!silent) setGhStatus('Allar myndir eru þegar samstilltar.');
       return;
     }
-    var done=0, failed=0;
+    var done=0, failed=0, touchedFids={};
     if(!silent) setGhStatus('Samstilli myndir (0/'+pending.length+')...');
     var chain=Promise.resolve();
     pending.forEach(function(ph){
       chain=chain.then(function(){
-        return uploadOnePhoto(cfg,headers,ph).then(function(){
-          ph.uploaded=true;
+        return uploadOnePhotoCloudinary(ph).then(function(url){
+          ph.uploaded=true; ph.cloudUrl=url;
+          touchedFids[ph.fid]=true;
           return idbPutPhoto(ph);
         }).catch(function(err){
           console.warn('Mynd '+ph.name+' - upphleðsla mistókst:',err);
@@ -1223,14 +1195,18 @@ function uploadPendingPhotos(silent){
     return chain.then(function(){
       photoSyncing=false;
       var okCount=done-failed;
-      if(!silent){
-        setGhStatus('Myndir samstilltar: '+okCount+'/'+pending.length+(failed?(' ('+failed+' mistókust)'):''));
-      }
-      if(okCount>0){
-        toast(okCount+(okCount===1?' mynd vistuð á GitHub ✓':' myndir vistaðar á GitHub ✓'));
-        remotePhotoCache=null; // næsta skoðun á myndum sækir ferskan lista
-      }
-      renderPhotoBlockIfOpen();
+      var refreshChain=Promise.resolve();
+      Object.keys(touchedFids).forEach(function(fid){
+        var pt=points.filter(function(x){return x.fid===fid;})[0];
+        if(pt) refreshChain=refreshChain.then(function(){ return refreshLjosmyndValue(pt); });
+      });
+      return refreshChain.then(function(){
+        if(!silent){
+          setGhStatus('Myndir samstilltar: '+okCount+'/'+pending.length+(failed?(' ('+failed+' mistókust)'):''));
+        }
+        if(okCount>0) toast(okCount+(okCount===1?' mynd vistuð í skýi ✓':' myndir vistaðar í skýi ✓'));
+        renderPhotoBlockIfOpen();
+      });
     });
   }).catch(function(err){
     photoSyncing=false;
@@ -1413,7 +1389,6 @@ document.getElementById('btn-sync').addEventListener('click',function(){
   runSync(true);
 });
 document.getElementById('gh-photos-sync').addEventListener('click',function(){
-  saveGhCfg();
   uploadPendingPhotos(false);
 });
 document.getElementById('gh-reset-cache').addEventListener('click',function(){
